@@ -1,0 +1,6 @@
+{
+  "watch": ["pages/**/*", "components/**/*", "styles/**/*", "public/**/*"],
+  "ext": "ts,tsx,js,jsx,json,css",
+  "ignore": ["node_modules", ".next"],
+  "exec": "npm run dev"
+} 
