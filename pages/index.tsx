@@ -1,4 +1,4 @@
-import TailwindTest from "@/components/TailwindTest";
+import TailwindTest from "@/templates/TailwindTest";
 
 export default function Home() {
   return (

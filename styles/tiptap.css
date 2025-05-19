@@ -1,0 +1,39 @@
+.tiptap {
+    height: 100%;
+    padding: 20px;
+    :first-child {
+      margin-top: 0;
+    }
+  
+    /* List styles */
+    ul, 
+    ol {
+      padding: 0 1rem;
+      margin: 1.25rem 1rem 1.25rem 0.4rem;
+      
+      li p {
+        margin-top: 0.25em;
+        margin-bottom: 0.25em;
+      }
+    }
+
+    /* Direct styling for all bullet lists in the editor */
+    ul, ul li, ul li::marker {
+      color: #2c2d2d !important;
+    }
+
+    /* Custom color class */
+    .colored-bullet-list,
+    .colored-bullet-list li,
+    .colored-bullet-list li::marker {
+      color: #2c2d2d !important;
+    }
+  }
+
+/* Global colored bullet list style */
+.ProseMirror ul, 
+.ProseMirror ul li,
+.ProseMirror ul li::marker {
+  color: #2c2d2d !important;
+}
+  
