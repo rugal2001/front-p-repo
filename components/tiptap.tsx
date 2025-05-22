@@ -22,8 +22,18 @@ import {
   MdFormatListBulleted,
   MdFormatQuote,
   MdLink,
+  MdLooksOne,
+  MdLooksTwo,
+  MdLooks3,
 } from "react-icons/md";
-import { LuBold, LuItalic, LuUnderline } from "react-icons/lu";
+import {
+  LuBold,
+  LuHeading1,
+  LuHeading2,
+  LuHeading3,
+  LuItalic,
+  LuUnderline,
+} from "react-icons/lu";
 import {
   useState,
   useEffect,
@@ -173,6 +183,12 @@ const extensions = [
   StarterKit.configure({
     bulletList: false, // disable the bulletList included in StarterKit
     codeBlock: false, // disable the default code block
+    heading: {
+      levels: [1, 2, 3],
+      HTMLAttributes: {
+        class: "tiptap-heading",
+      },
+    },
   }),
   Bold.configure({
     HTMLAttributes: {
@@ -213,6 +229,7 @@ const extensions = [
 ];
 
 const content = `
+<h1>Heading 1</h1>
 <h2>1. Inline <code>&lt;code&gt;</code></h2>
     <p>You can use <code>&lt;code&gt;</code> to style short snippets like <code>const x = 42;</code>.</p>
 
@@ -274,6 +291,37 @@ const Tiptap = () => {
       }
       .ProseMirror a:hover {
         color: #2563eb;
+      }
+      
+      .ProseMirror h1 {
+        font-size: 2rem;
+        line-height: 2.5rem;
+        font-weight: 700;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .ProseMirror h2 {
+        font-size: 1.5rem;
+        line-height: 2rem;
+        font-weight: 600;
+        margin-top: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .ProseMirror h3 {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+        font-weight: 600;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      /* Heading selection styles */
+      .ProseMirror h1.is-editor-selected,
+      .ProseMirror h2.is-editor-selected,
+      .ProseMirror h3.is-editor-selected {
+        background-color: rgba(59, 130, 246, 0.1);
       }
     `;
     document.head.appendChild(style);
@@ -350,6 +398,18 @@ const Tiptap = () => {
   };
 
   const MenuItems = [
+    {
+      icon: <LuHeading1 />,
+      onClick: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
+    },
+    {
+      icon: <LuHeading2 />,
+      onClick: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+    },
+    {
+      icon: <LuHeading3 />,
+      onClick: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
+    },
     {
       icon: <LuBold />,
       onClick: () => editor.chain().focus().toggleBold().run(),
