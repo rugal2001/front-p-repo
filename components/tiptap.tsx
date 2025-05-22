@@ -4,6 +4,8 @@ import {
   FloatingMenu,
   BubbleMenu,
   Editor,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
 } from "@tiptap/react";
 import { IoMdClose, IoMdTrash } from "react-icons/io";
 import { FaCheck } from "react-icons/fa6";
@@ -13,6 +15,7 @@ import Bold from "@tiptap/extension-bold";
 import Italic from "@tiptap/extension-italic";
 import Underline from "@tiptap/extension-underline";
 import Image from "@tiptap/extension-image";
+import { Node as ProseMirrorNode } from "prosemirror-model";
 import BulletList from "@tiptap/extension-bullet-list";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Link from "@tiptap/extension-link";
@@ -25,6 +28,7 @@ import {
   MdLooksOne,
   MdLooksTwo,
   MdLooks3,
+  MdImage,
 } from "react-icons/md";
 import {
   LuBold,
@@ -42,6 +46,7 @@ import {
   ChangeEvent,
   useCallback,
   FormEvent,
+  CSSProperties,
 } from "react";
 
 // Import additional languages for syntax highlighting
@@ -178,6 +183,185 @@ const CustomCodeBlockLowlight = CodeBlockLowlight.extend({
   },
 });
 
+// Custom resizable image component
+interface ResizableImageProps {
+  node: ProseMirrorNode;
+  updateAttributes: (attrs: { [key: string]: any }) => void;
+  editor: Editor;
+}
+
+const ResizableImageComponent: React.FC<ResizableImageProps> = ({
+  node,
+  updateAttributes,
+  editor,
+}) => {
+  const [isResizing, setIsResizing] = useState(false);
+  const [initialWidth, setInitialWidth] = useState(0);
+  const [initialHeight, setInitialHeight] = useState(0);
+  const [initialX, setInitialX] = useState(0);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  // Set initial dimensions when component mounts
+  useEffect(() => {
+    if (imageRef.current) {
+      // If image doesn't have width/height attributes yet, set them from the natural dimensions
+      if (!node.attrs.width || !node.attrs.height) {
+        const img = imageRef.current;
+        // Use onload to ensure dimensions are available
+        if (img.complete) {
+          updateAttributes({
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+          });
+        } else {
+          img.onload = () => {
+            updateAttributes({
+              width: img.naturalWidth,
+              height: img.naturalHeight,
+            });
+          };
+        }
+      }
+    }
+  }, [node.attrs.src]);
+
+  const startResizing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!imageRef.current) return;
+
+    setIsResizing(true);
+    setInitialWidth(imageRef.current.offsetWidth);
+    setInitialHeight(imageRef.current.offsetHeight);
+    setInitialX(e.clientX);
+  };
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing || !imageRef.current) return;
+
+      const widthChange = e.clientX - initialX;
+      const newWidth = Math.max(100, initialWidth + widthChange); // Minimum width of 100px
+
+      // Apply aspect ratio to maintain proportions
+      const aspectRatio = initialWidth / initialHeight;
+      const newHeight = Math.round(newWidth / aspectRatio);
+
+      updateAttributes({
+        width: newWidth,
+        height: newHeight,
+      });
+    },
+    [isResizing, initialWidth, initialHeight, initialX, updateAttributes]
+  );
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  // Add and remove event listeners
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", stopResizing);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", stopResizing);
+    };
+  }, [isResizing, handleMouseMove, stopResizing]);
+
+  return (
+    <NodeViewWrapper>
+      <div
+        className="resizable-image-wrapper group"
+        style={{
+          position: "relative",
+          display: "inline-block",
+          margin: "0.5rem 0",
+        }}
+      >
+        <img
+          ref={imageRef}
+          src={node.attrs.src}
+          alt={node.attrs.alt || ""}
+          width={node.attrs.width || undefined}
+          height={node.attrs.height || undefined}
+          className="rounded-lg shadow border-[1px] border-gray-400"
+          draggable={false}
+          style={{ display: "block" }}
+        />
+        {editor.isEditable && (
+          <div
+            onMouseDown={startResizing}
+            className={`
+              opacity-0
+              group-hover:opacity-100
+              resize-handle
+              w-3 h-3
+              bg-white
+              border-2 border-blue-500
+              absolute
+              bottom-1 right-1
+              cursor-se-resize
+              rounded-full
+              z-10
+              ${isResizing ? "pointer-events-none" : "pointer-events-auto"}
+            `}
+          />
+        )}
+        {isResizing && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 100,
+              cursor: "se-resize",
+            }}
+          />
+        )}
+      </div>
+    </NodeViewWrapper>
+  );
+};
+
+// Define custom image extension with resizing capability
+const ResizableImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: null,
+      },
+      height: {
+        default: null,
+      },
+    };
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableImageComponent);
+  },
+  addCommands() {
+    return {
+      ...this.parent?.(),
+      // Override setImage command to include width and height
+      setImage:
+        (attrs) =>
+        ({ commands }) => {
+          return commands.insertContent({
+            type: this.name,
+            attrs: attrs,
+          });
+        },
+    };
+  },
+});
+
 // define your extension array
 const extensions = [
   StarterKit.configure({
@@ -190,9 +374,9 @@ const extensions = [
       },
     },
   }),
-  Image.configure({
+  ResizableImage.configure({
     HTMLAttributes: {
-      class: "rounded-lg shadow-lg border-[1px] border-gray-400",
+      class: "rounded-lg shadow border-[1px] border-gray-400",
     },
     allowBase64: true,
   }),
@@ -236,7 +420,7 @@ const extensions = [
 
 const content = `
 <h1>Heading 1</h1>
-<img src="https://placehold.co/800x400/6A00F5/white" />
+<img src="https://placehold.co/800x400/6A00F5/white" width="800" height="400" />
 <h2>1. Inline <code>&lt;code&gt;</code></h2>
     <p>You can use <code>&lt;code&gt;</code> to style short snippets like <code>const x = 42;</code>.</p>
 
@@ -277,6 +461,10 @@ const Tiptap = () => {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkPosition, setLinkPosition] = useState({ top: 0, left: 0 });
   const [linkUrl, setLinkUrl] = useState("");
+  const [showImageInput, setShowImageInput] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imagePosition, setImagePosition] = useState({ top: 0, left: 0 });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     extensions,
@@ -404,6 +592,119 @@ const Tiptap = () => {
     }
   };
 
+  // Add image handling functions
+  const openImageMenu = () => {
+    // Get current selection position
+    const { view } = editor;
+    if (view && view.state) {
+      const { from } = view.state.selection;
+      const coords = view.coordsAtPos(from);
+
+      // Set position for popup
+      setImagePosition({
+        top: coords.bottom + 10,
+        left: coords.left,
+      });
+
+      // Show the input
+      setShowImageInput(true);
+    }
+  };
+
+  const insertImage = () => {
+    if (imageUrl) {
+      // Create a temporary image to get natural dimensions
+      const tempImg = document.createElement("img");
+      tempImg.onload = () => {
+        // Insert with natural dimensions from the loaded image
+        editor
+          .chain()
+          .focus()
+          .insertContent({
+            type: "image",
+            attrs: {
+              src: imageUrl,
+              width: tempImg.naturalWidth,
+              height: tempImg.naturalHeight,
+            },
+          })
+          .run();
+        setImageUrl("");
+        setShowImageInput(false);
+      };
+      tempImg.onerror = () => {
+        // If image fails to load, insert with default dimensions
+        editor
+          .chain()
+          .focus()
+          .insertContent({
+            type: "image",
+            attrs: {
+              src: imageUrl,
+              width: 500,
+              height: 300,
+            },
+          })
+          .run();
+        setImageUrl("");
+        setShowImageInput(false);
+      };
+      tempImg.src = imageUrl;
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+
+        // Create a temporary image to get natural dimensions
+        const tempImg = document.createElement("img");
+        tempImg.onload = () => {
+          editor
+            .chain()
+            .focus()
+            .insertContent({
+              type: "image",
+              attrs: {
+                src: result,
+                width: tempImg.naturalWidth,
+                height: tempImg.naturalHeight,
+              },
+            })
+            .run();
+
+          // Reset the input value so the same file can be selected again if needed
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        };
+        tempImg.src = result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleClickOutsideImage = (e: React.MouseEvent) => {
+    // Close the image input if clicked outside
+    const target = e.target as Element;
+    if (!target.closest(".image-input-popup")) {
+      setShowImageInput(false);
+    }
+  };
+
+  const handleImageKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      insertImage();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setShowImageInput(false);
+    }
+  };
+
   const MenuItems = [
     {
       icon: <LuHeading1 />,
@@ -441,13 +742,32 @@ const Tiptap = () => {
       icon: <MdLink />,
       onClick: openLinkMenu,
     },
+    {
+      icon: <MdImage />,
+      onClick: openImageMenu,
+    },
   ];
 
   return (
     <div
       className="tiptap-wrapper"
-      onClick={showLinkInput ? handleClickOutside : undefined}
+      onClick={
+        showLinkInput
+          ? handleClickOutside
+          : showImageInput
+          ? handleClickOutsideImage
+          : undefined
+      }
     >
+      {/* File input for image uploads (hidden but triggered via button) */}
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileUpload}
+      />
+
       <div className="overflow-y-auto tiptap-editor-container">
         <EditorContent className="w-full tiptap" editor={editor} />
       </div>
@@ -519,6 +839,45 @@ const Tiptap = () => {
               className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
             >
               <IoMdTrash />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showImageInput && (
+        <div
+          className="fixed z-50 p-2 bg-white border border-gray-200 rounded-md shadow image-input-popup"
+          style={{
+            top: imagePosition.top + "px",
+            left: imagePosition.left + "px",
+          }}
+        >
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-1">
+              <Input
+                type="text"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                onKeyDown={handleImageKeyDown}
+                placeholder="Enter image URL..."
+                className="flex-1 w-64 h-8 p-1 border rounded shadow-none focus:outline-none"
+                autoFocus
+              />
+              <button
+                onClick={insertImage}
+                className="px-2 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
+              >
+                Insert
+              </button>
+            </div>
+            <div className="text-center">
+              <span className="text-xs text-gray-400">or</span>
+            </div>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-2 py-1 text-sm text-white bg-green-500 rounded hover:bg-green-600"
+            >
+              Upload image
             </button>
           </div>
         </div>
