@@ -23,7 +23,6 @@ const extensions = [
   }),
 ];
 
-// Include a bullet list in the initial content to test styling
 const content = `
 <p>Hello World!</p>
 <ul class="colored-bullet-list">
@@ -44,26 +43,6 @@ const Tiptap = () => {
     },
   });
 
-  // Apply custom styles to bullet lists after initial render
-  useEffect(() => {
-    if (editor) {
-      // Custom styling could be applied here if needed
-      const editorElement = document.querySelector(".tiptap");
-      if (editorElement) {
-        const lists = editorElement.querySelectorAll(
-          "ul.colored-bullet-list, ul"
-        );
-        lists.forEach((list) => {
-          list.classList.add("text-blue-500");
-          const items = list.querySelectorAll("li");
-          items.forEach((item) => {
-            item.classList.add("text-blue-500");
-          });
-        });
-      }
-    }
-  }, [editor]);
-
   if (!editor) {
     return null;
   }
@@ -71,7 +50,7 @@ const Tiptap = () => {
   return (
     <>
       <EditorContent className="w-full h-screen tiptap" editor={editor} />
-      {/* <FloatingMenu editor={editor}>This is the floating menu</FloatingMenu> */}
+      <FloatingMenu editor={editor}>This is the floating menu</FloatingMenu>
       <BubbleMenu editor={editor}>
         <div
           onClick={() => editor.chain().focus().toggleBulletList().run()}

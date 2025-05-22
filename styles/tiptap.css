@@ -17,23 +17,123 @@
       }
     }
 
-    /* Direct styling for all bullet lists in the editor */
-    ul, ul li, ul li::marker {
-      color: #2c2d2d !important;
+    /* Adjust nested list margins and spacing */
+    ul ul, 
+    ul ul ul,
+    ul ul ul ul,
+    ul ul ul ul ul,
+    ul ul ul ul ul ul {
+      margin-top: 0.25rem;    /* Reduce top margin for nested lists */
+      margin-bottom: 0.25rem; /* Reduce bottom margin for nested lists */
+    }
+    
+    /* Remove excessive padding for nested lists */
+    ul li ul {
+      padding-bottom: 0;
+    }
+
+    /* First level bullets - filled circle (disc) */
+    ul {
+      list-style-type: disc;
+      margin-left: 1em;
+    }
+    
+    /* Second level bullets - empty circle */
+    ul ul {
+      list-style-type: circle;
+    }
+    
+    /* Third level bullets - filled square */
+    ul ul ul {
+      list-style-type: square;
+    }
+    
+    /* Fourth level bullets - back to filled circle */
+    ul ul ul ul {
+      list-style-type: disc;
+    }
+    
+    /* Fifth level bullets - back to empty circle */
+    ul ul ul ul ul {
+      list-style-type: circle;
+    }
+    
+    /* Sixth level bullets - back to filled square */
+    ul ul ul ul ul ul {
+      list-style-type: square;
+    }
+
+    ul li {
+      color: #2c2d2d;
+      position: relative;
+      display: list-item;
+      margin-bottom: 0.125rem; /* Reduce space between list items */
+    }
+
+    /* Nested list items should have less vertical space */
+    ul ul li {
+      margin-bottom: 0;
+    }
+
+    ul li::marker {
+      color: #333333 !important;
+      font-size: 1.2em;
     }
 
     /* Custom color class */
-    .colored-bullet-list,
-    .colored-bullet-list li,
     .colored-bullet-list li::marker {
-      color: #2c2d2d !important;
+      color: #333333 !important;
     }
   }
 
-/* Global colored bullet list style */
-.ProseMirror ul, 
-.ProseMirror ul li,
-.ProseMirror ul li::marker {
-  color: #2c2d2d !important;
+/* Global bullet list style */
+.ProseMirror ul {
+  list-style-type: disc !important;
 }
+
+/* Second level of nested lists */  
+.ProseMirror ul ul {
+  list-style-type: circle !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Third level of nested lists */
+.ProseMirror ul ul ul {
+  list-style-type: square !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Fourth level of nested lists */
+.ProseMirror ul ul ul ul {
+  list-style-type: disc !important;
+}
+
+/* Fifth level of nested lists */
+.ProseMirror ul ul ul ul ul {
+  list-style-type: circle !important;
+}
+
+/* Sixth level of nested lists */
+.ProseMirror ul ul ul ul ul ul {
+  list-style-type: square !important;
+}
+  
+.ProseMirror ul li {
+  display: list-item !important;
+  color: #2c2d2d;
+  position: relative;
+  margin-bottom: 0.125rem; /* Reduce space between list items */
+}
+
+.ProseMirror ul ul li {
+  margin-bottom: 0; /* Even less space for nested items */
+}
+
+.ProseMirror ul li::marker {
+  color: #333333 !important;
+  font-size: 1.2em;
+}
+  
   
