@@ -6,7 +6,7 @@ import {
 } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import BulletList from "@tiptap/extension-bullet-list";
-import { MdFormatListBulleted } from "react-icons/md";
+import { MdCode, MdFormatListBulleted } from "react-icons/md";
 import { useEffect } from "react";
 
 // define your extension array
@@ -24,12 +24,16 @@ const extensions = [
 ];
 
 const content = `
-<p>Hello World!</p>
-<ul class="colored-bullet-list">
-  <li><p>First item in the bullet list</p></li>
-  <li><p>Second item in the bullet list</p></li>
-</ul>
-<p>More text after the list</p>
+<h2>1. Inline <code>&lt;code&gt;</code></h2>
+    <p>You can use <code>&lt;code&gt;</code> to style short snippets like <code>const x = 42;</code>.</p>
+
+    <h2>2. Block <code>&lt;pre&gt;&lt;code&gt;</code></h2>
+    <pre><code>// This is a JavaScript example
+function greet(name) {
+    return \`Hello, \${name}!\`;
+}
+
+console.log(greet("World"));</code></pre>
 `;
 
 const Tiptap = () => {
@@ -51,6 +55,10 @@ const Tiptap = () => {
     {
       icon: <MdFormatListBulleted />,
       onClick: () => editor.chain().focus().toggleBulletList().run(),
+    },
+    {
+      icon: <MdCode />,
+      onClick: () => editor.chain().focus().toggleCodeBlock().run(),
     },
   ];
   return (
