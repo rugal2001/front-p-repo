@@ -12,16 +12,19 @@
   "dependencies": {
     "@tiptap/extension-bullet-list": "^2.12.0",
     "@tiptap/extension-code-block-lowlight": "^2.12.0",
+    "@tiptap/extension-link": "^2.12.0",
     "@tiptap/extension-list-item": "^2.12.0",
     "@tiptap/pm": "^2.12.0",
     "@tiptap/react": "^2.12.0",
     "@tiptap/starter-kit": "^2.12.0",
+    "clsx": "^2.1.1",
     "highlight.js": "^11.11.1",
     "lowlight": "^3.3.0",
     "next": "12.2.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",

@@ -3,13 +3,31 @@ import {
   EditorContent,
   FloatingMenu,
   BubbleMenu,
+  Editor,
 } from "@tiptap/react";
+import { IoMdClose, IoMdTrash } from "react-icons/io";
+import { FaCheck } from "react-icons/fa6";
+import { IoClose } from "react-icons/io5";
 import StarterKit from "@tiptap/starter-kit";
 import BulletList from "@tiptap/extension-bullet-list";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import Link from "@tiptap/extension-link";
 import { common, createLowlight } from "lowlight";
-import { MdCode, MdFormatListBulleted, MdFormatQuote } from "react-icons/md";
-import { useState, useEffect } from "react";
+import {
+  MdCode,
+  MdFormatListBulleted,
+  MdFormatQuote,
+  MdLink,
+} from "react-icons/md";
+import {
+  useState,
+  useEffect,
+  useRef,
+  KeyboardEvent,
+  ChangeEvent,
+  useCallback,
+  FormEvent,
+} from "react";
 
 // Import additional languages for syntax highlighting
 import javascript from "highlight.js/lib/languages/javascript";
@@ -17,6 +35,7 @@ import python from "highlight.js/lib/languages/python";
 import typescript from "highlight.js/lib/languages/typescript";
 import css from "highlight.js/lib/languages/css";
 import xml from "highlight.js/lib/languages/xml";
+import { Input } from "./shadcn/input";
 
 // Create lowlight instance with all languages
 const lowlight = createLowlight(common);
@@ -164,6 +183,13 @@ const extensions = [
       class: "code-block",
     },
   }),
+  Link.configure({
+    openOnClick: true,
+    HTMLAttributes: {
+      class: "custom-link",
+      rel: "noopener noreferrer",
+    },
+  }),
 ];
 
 const content = `
@@ -203,6 +229,11 @@ print(greet("World"))</code></pre>
 `;
 
 const Tiptap = () => {
+  // Simple state to track if we're showing the link input
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkPosition, setLinkPosition] = useState({ top: 0, left: 0 });
+  const [linkUrl, setLinkUrl] = useState("");
+
   const editor = useEditor({
     extensions,
     content,
@@ -213,6 +244,22 @@ const Tiptap = () => {
     },
   });
 
+  // Add link styling
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .ProseMirror a {
+        color: #3b82f6;
+        text-decoration: underline;
+      }
+      .ProseMirror a:hover {
+        color: #2563eb;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => style.remove();
+  }, []);
+
   if (!editor) {
     return null;
   }
@@ -221,20 +268,87 @@ const Tiptap = () => {
     editor.chain().focus().toggleCodeBlock().run();
   };
 
+  const openLinkMenu = () => {
+    // Get current selection position
+    const { view } = editor;
+    if (view && view.state) {
+      const { from } = view.state.selection;
+      const coords = view.coordsAtPos(from);
+
+      // Set position for popup
+      setLinkPosition({
+        top: coords.bottom + 10,
+        left: coords.left,
+      });
+
+      // Get current link if it exists
+      const attrs = editor.getAttributes("link");
+      setLinkUrl(attrs.href || "");
+
+      // Show the input
+      setShowLinkInput(true);
+    }
+  };
+
+  const applyLink = () => {
+    if (linkUrl) {
+      // Add http:// if it's missing
+      const href = linkUrl.match(/^https?:\/\//)
+        ? linkUrl
+        : `http://${linkUrl}`;
+      editor.chain().focus().setLink({ href }).run();
+    } else {
+      // Remove the link if URL is empty
+      editor.chain().focus().unsetLink().run();
+    }
+    setShowLinkInput(false);
+  };
+
+  const removeLink = () => {
+    editor.chain().focus().unsetLink().run();
+    setLinkUrl("");
+    setShowLinkInput(false);
+  };
+
+  // Handle key events in the input
+  const handleLinkKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      applyLink();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setShowLinkInput(false);
+    }
+  };
+
+  const handleClickOutside = (e: React.MouseEvent) => {
+    // Close the link input if clicked outside
+    const target = e.target as Element;
+    if (!target.closest(".link-input-popup")) {
+      setShowLinkInput(false);
+    }
+  };
+
   const MenuItems = [
     {
       icon: <MdFormatListBulleted />,
       onClick: () => editor.chain().focus().toggleBulletList().run(),
     },
-
     {
       icon: <MdCode />,
       onClick: toggleCodeBlock,
     },
+    {
+      icon: <MdLink />,
+      onClick: openLinkMenu,
+    },
   ];
 
   return (
-    <div className="tiptap-wrapper">
+    <div
+      className="tiptap-wrapper"
+      onClick={showLinkInput ? handleClickOutside : undefined}
+    >
       <div className="overflow-y-auto tiptap-editor-container">
         <EditorContent className="w-full tiptap" editor={editor} />
       </div>
@@ -266,6 +380,50 @@ const Tiptap = () => {
           ))}
         </div>
       </BubbleMenu>
+
+      {showLinkInput && (
+        <div
+          className="fixed z-50 p-1 bg-white border border-gray-200 rounded-md shadow link-input-popup"
+          style={{
+            top: linkPosition.top + "px",
+            left: linkPosition.left + "px",
+          }}
+        >
+          <div className="flex gap-1 ">
+            <Input
+              type="text"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={handleLinkKeyDown}
+              placeholder="Enter URL..."
+              className="flex-1 w-56 h-6 p-1 border-none rounded shadow-none focus:outline-none focus-visible:ring-0"
+              autoFocus
+            />
+            <div className="h-6 w-[1px] bg-stone-300"></div>
+
+            <button
+              onClick={applyLink}
+              className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
+            >
+              <FaCheck />
+            </button>
+            <button
+              onClick={() => setShowLinkInput(false)}
+              className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
+            >
+              <IoClose className="text-lg" />
+            </button>
+            <button
+              onClick={() => {
+                removeLink();
+              }}
+              className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
+            >
+              <IoMdTrash />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
