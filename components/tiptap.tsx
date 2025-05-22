@@ -1,35 +1,28 @@
 import {
-  useEditor,
-  EditorContent,
-  FloatingMenu,
   BubbleMenu,
   Editor,
+  EditorContent,
+  FloatingMenu,
   NodeViewWrapper,
   ReactNodeViewRenderer,
+  useEditor,
 } from "@tiptap/react";
-import { IoMdClose, IoMdTrash } from "react-icons/io";
-import { FaCheck } from "react-icons/fa6";
-import { IoClose } from "react-icons/io5";
-import StarterKit from "@tiptap/starter-kit";
+import { IoMdTrash } from "react-icons/io";
+import HorizontalRule from "@tiptap/extension-horizontal-rule";
+
 import Bold from "@tiptap/extension-bold";
-import Italic from "@tiptap/extension-italic";
-import Underline from "@tiptap/extension-underline";
-import Image from "@tiptap/extension-image";
-import { Node as ProseMirrorNode } from "prosemirror-model";
 import BulletList from "@tiptap/extension-bullet-list";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import Image from "@tiptap/extension-image";
+import Italic from "@tiptap/extension-italic";
 import Link from "@tiptap/extension-link";
+import Underline from "@tiptap/extension-underline";
+import StarterKit from "@tiptap/starter-kit";
 import { common, createLowlight } from "lowlight";
-import {
-  MdCode,
-  MdFormatListBulleted,
-  MdFormatQuote,
-  MdLink,
-  MdLooksOne,
-  MdLooksTwo,
-  MdLooks3,
-  MdImage,
-} from "react-icons/md";
+import { Node as ProseMirrorNode } from "prosemirror-model";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FaCheck } from "react-icons/fa6";
+import { IoClose } from "react-icons/io5";
 import {
   LuBold,
   LuHeading1,
@@ -37,23 +30,17 @@ import {
   LuHeading3,
   LuItalic,
   LuUnderline,
+  LuMinus,
+  LuSeparatorHorizontal,
 } from "react-icons/lu";
-import {
-  useState,
-  useEffect,
-  useRef,
-  KeyboardEvent,
-  ChangeEvent,
-  useCallback,
-  FormEvent,
-  CSSProperties,
-} from "react";
+import { RxHamburgerMenu } from "react-icons/rx";
+import { MdCode, MdFormatListBulleted, MdImage, MdLink } from "react-icons/md";
 
 // Import additional languages for syntax highlighting
+import css from "highlight.js/lib/languages/css";
 import javascript from "highlight.js/lib/languages/javascript";
 import python from "highlight.js/lib/languages/python";
 import typescript from "highlight.js/lib/languages/typescript";
-import css from "highlight.js/lib/languages/css";
 import xml from "highlight.js/lib/languages/xml";
 import { Input } from "./shadcn/input";
 
@@ -289,28 +276,25 @@ const ResizableImageComponent: React.FC<ResizableImageProps> = ({
           alt={node.attrs.alt || ""}
           width={node.attrs.width || undefined}
           height={node.attrs.height || undefined}
-          className="rounded-lg shadow border-[1px] border-gray-400"
+          className="rounded-lg shadow border-[1px] border-gray-200"
           draggable={false}
           style={{ display: "block" }}
         />
         {editor.isEditable && (
-          <div
-            onMouseDown={startResizing}
-            className={`
-              opacity-0
-              group-hover:opacity-100
-              resize-handle
-              w-3 h-3
-              bg-white
-              border-2 border-blue-500
-              absolute
-              bottom-1 right-1
-              cursor-se-resize
-              rounded-full
-              z-10
-              ${isResizing ? "pointer-events-none" : "pointer-events-auto"}
-            `}
-          />
+          <>
+            <div
+              onMouseDown={startResizing}
+              className={`absolute top-1/2 left-0 w-2 h-12  -translate-y-1/2 bg-white opacity-0 group-hover:opacity-100 rounded-full ml-1 shadow-lg border border-gray-200 ${
+                isResizing ? " cursor-col-resize" : " cursor-col-resize"
+              }`}
+            />
+            <div
+              onMouseDown={startResizing}
+              className={`absolute top-1/2 right-0 w-2 h-12  -translate-y-1/2 bg-white opacity-0 group-hover:opacity-100 rounded-full mr-1 shadow-lg border border-gray-200 ${
+                isResizing ? " cursor-col-resize" : " cursor-col-resize"
+              }`}
+            />
+          </>
         )}
         {isResizing && (
           <div
@@ -321,7 +305,7 @@ const ResizableImageComponent: React.FC<ResizableImageProps> = ({
               right: 0,
               bottom: 0,
               zIndex: 100,
-              cursor: "se-resize",
+              cursor: "col-resize",
             }}
           />
         )}
@@ -372,6 +356,11 @@ const extensions = [
       HTMLAttributes: {
         class: "tiptap-heading",
       },
+    },
+  }),
+  HorizontalRule.configure({
+    HTMLAttributes: {
+      class: "horizontal-rule",
     },
   }),
   ResizableImage.configure({
@@ -729,6 +718,10 @@ const Tiptap = () => {
     {
       icon: <LuUnderline />,
       onClick: () => editor.chain().focus().toggleUnderline().run(),
+    },
+    {
+      icon: <LuSeparatorHorizontal />,
+      onClick: () => editor.chain().focus().setHorizontalRule().run(),
     },
     {
       icon: <MdFormatListBulleted />,

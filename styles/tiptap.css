@@ -548,5 +548,18 @@
 .code-block-with-lang[data-language="css"] .property {
   color: #5a1ebb;
 }
+
+/* Horizontal Rule styling */
+.horizontal-rule {
+  margin: 1.5rem 0;
+  height: 2px;
+  background-color: #e5e7eb;
+  border: none;
+}
+
+/* Style for horizontal rule when selected */
+.ProseMirror .is-editor-selected.horizontal-rule {
+  background-color: #3b82f6;
+}
   
   
