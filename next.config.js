@@ -12,6 +12,15 @@ const nextConfig = {
     // For production, you should run linting as part of your CI/CD process
     ignoreDuringBuilds: true,
   },
+  distDir: '.next',
+  webpack: (config, { dev, isServer }) => {
+    // Reduce parallelism in production builds
+    if (!dev && !isServer) {
+      config.parallelism = 1;
+      config.cache = false;
+    }
+    return config;
+  },
 }
 
 module.exports = nextConfig
