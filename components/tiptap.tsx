@@ -47,16 +47,28 @@ const Tiptap = () => {
     return null;
   }
 
+  const MenuItems = [
+    {
+      icon: <MdFormatListBulleted />,
+      onClick: () => editor.chain().focus().toggleBulletList().run(),
+    },
+  ];
   return (
     <>
       <EditorContent className="w-full h-screen tiptap" editor={editor} />
-      <FloatingMenu editor={editor}>This is the floating menu</FloatingMenu>
+      <FloatingMenu editor={editor}>
+        <span className="text-sm text-gray-500">This is the floating menu</span>
+      </FloatingMenu>
       <BubbleMenu editor={editor}>
-        <div
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className="p-2 text-white bg-blue-500 rounded-md"
-        >
-          <MdFormatListBulleted />
+        <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow">
+          {MenuItems.map((item) => (
+            <div
+              onClick={item.onClick}
+              className="p-1 text-lg text-gray-800 rounded-md hover:bg-gray-200"
+            >
+              {item.icon}
+            </div>
+          ))}
         </div>
       </BubbleMenu>
     </>
