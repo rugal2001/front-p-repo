@@ -38,7 +38,7 @@ const CustomCodeBlockLowlight = CodeBlockLowlight.extend({
 
       const label = document.createElement("span");
       label.classList.add("code-editor-label");
-      label.textContent = "code editor";
+      label.textContent = "";
       toolbar.appendChild(label);
 
       // Create a wrapper for the select to style it better
