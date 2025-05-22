@@ -9,6 +9,10 @@ import { IoMdClose, IoMdTrash } from "react-icons/io";
 import { FaCheck } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
 import StarterKit from "@tiptap/starter-kit";
+import Bold from "@tiptap/extension-bold";
+import Italic from "@tiptap/extension-italic";
+import Underline from "@tiptap/extension-underline";
+
 import BulletList from "@tiptap/extension-bullet-list";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Link from "@tiptap/extension-link";
@@ -19,6 +23,7 @@ import {
   MdFormatQuote,
   MdLink,
 } from "react-icons/md";
+import { LuBold, LuItalic, LuUnderline } from "react-icons/lu";
 import {
   useState,
   useEffect,
@@ -168,6 +173,21 @@ const extensions = [
   StarterKit.configure({
     bulletList: false, // disable the bulletList included in StarterKit
     codeBlock: false, // disable the default code block
+  }),
+  Bold.configure({
+    HTMLAttributes: {
+      class: "font-bold",
+    },
+  }),
+  Italic.configure({
+    HTMLAttributes: {
+      class: "font-italic",
+    },
+  }),
+  Underline.configure({
+    HTMLAttributes: {
+      class: "underline",
+    },
   }),
   BulletList.configure({
     HTMLAttributes: {
@@ -330,6 +350,18 @@ const Tiptap = () => {
   };
 
   const MenuItems = [
+    {
+      icon: <LuBold />,
+      onClick: () => editor.chain().focus().toggleBold().run(),
+    },
+    {
+      icon: <LuItalic />,
+      onClick: () => editor.chain().focus().toggleItalic().run(),
+    },
+    {
+      icon: <LuUnderline />,
+      onClick: () => editor.chain().focus().toggleUnderline().run(),
+    },
     {
       icon: <MdFormatListBulleted />,
       onClick: () => editor.chain().focus().toggleBulletList().run(),
