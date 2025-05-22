@@ -712,56 +712,67 @@ const Tiptap = () => {
   const MenuItems = [
     {
       icon: <LuHeading1 />,
+      label: "Heading 1",
       onClick: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
       isActive: () => editor.isActive("heading", { level: 1 }),
     },
     {
       icon: <LuHeading2 />,
+      label: "Heading 2",
       onClick: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
       isActive: () => editor.isActive("heading", { level: 2 }),
     },
     {
       icon: <LuHeading3 />,
+      label: "Heading 3",
       onClick: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
       isActive: () => editor.isActive("heading", { level: 3 }),
     },
     {
       icon: <LuBold />,
+      label: "Bold",
       onClick: () => editor.chain().focus().toggleBold().run(),
       isActive: () => editor.isActive("bold"),
     },
     {
       icon: <LuItalic />,
+      label: "Italic",
       onClick: () => editor.chain().focus().toggleItalic().run(),
       isActive: () => editor.isActive("italic"),
     },
     {
       icon: <LuUnderline />,
+      label: "Underline",
       onClick: () => editor.chain().focus().toggleUnderline().run(),
       isActive: () => editor.isActive("underline"),
     },
     {
       icon: <LuSeparatorHorizontal />,
+      label: "Horizontal Rule",
       onClick: () => editor.chain().focus().setHorizontalRule().run(),
       isActive: () => false, // Horizontal rule doesn't have an active state
     },
     {
       icon: <MdFormatListBulleted />,
+      label: "Bullet List",
       onClick: () => editor.chain().focus().toggleBulletList().run(),
       isActive: () => editor.isActive("bulletList"),
     },
     {
       icon: <MdCode />,
+      label: "Code Block",
       onClick: toggleCodeBlock,
       isActive: () => editor.isActive("codeBlock"),
     },
     {
       icon: <MdLink />,
+      label: "Link",
       onClick: openLinkMenu,
       isActive: () => editor.isActive("link"),
     },
     {
       icon: <FiImage />,
+      label: "Image",
       onClick: openImageMenu,
       isActive: () => false, // Image insertion doesn't have an active state
     },
@@ -791,19 +802,25 @@ const Tiptap = () => {
         <EditorContent className="w-full tiptap" editor={editor} />
       </div>
 
-      <FloatingMenu editor={editor}>
-        <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow">
+      <FloatingMenu
+        editor={editor}
+        tippyOptions={{
+          placement: "top-start",
+        }}
+      >
+        <div className="flex flex-col items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow h-60 w-40 overflow-y-auto">
           {MenuItems.map((item, index) => (
             <div
               key={index}
               onClick={item.onClick}
-              className={`p-1 text-lg rounded-md cursor-pointer ${
+              className={`p-1 text-lg rounded-md cursor-pointer flex gap-x-2 items-center  w-full ${
                 item.isActive()
-                  ? "bg-blue-100 text-blue-600"
-                  : "text-gray-800 hover:bg-gray-200"
+                  ? "bg-orange-100 text-orange-600"
+                  : "text-gray-800 hover:bg-gray-200 hover:text-orange-600"
               }`}
             >
-              {item.icon}
+              <div className="text-orange-600 bg-orange-100">{item.icon}</div>
+              <span className="text-sm">{item.label}</span>
             </div>
           ))}
         </div>
@@ -817,7 +834,7 @@ const Tiptap = () => {
               onClick={item.onClick}
               className={`p-1 text-lg rounded-md cursor-pointer ${
                 item.isActive()
-                  ? "bg-blue-100 text-blue-600"
+                  ? "bg-orange-100 text-orange-600"
                   : "text-gray-800 hover:bg-gray-200"
               }`}
             >
