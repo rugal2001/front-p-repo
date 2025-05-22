@@ -35,6 +35,7 @@ import {
 } from "react-icons/lu";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { MdCode, MdFormatListBulleted, MdImage, MdLink } from "react-icons/md";
+import { FiImage } from "react-icons/fi";
 
 // Import additional languages for syntax highlighting
 import css from "highlight.js/lib/languages/css";
@@ -749,7 +750,7 @@ const Tiptap = () => {
       onClick: openLinkMenu,
     },
     {
-      icon: <MdImage />,
+      icon: <FiImage />,
       onClick: openImageMenu,
     },
   ];
@@ -852,38 +853,40 @@ const Tiptap = () => {
 
       {showImageInput && (
         <div
-          className="fixed z-50 p-2 bg-white border border-gray-200 rounded-md shadow image-input-popup"
+          className="fixed z-50 p-1 bg-white border border-gray-200 rounded-md shadow image-input-popup"
           style={{
             top: imagePosition.top + "px",
             left: imagePosition.left + "px",
           }}
         >
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-1">
-              <Input
-                type="text"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                onKeyDown={handleImageKeyDown}
-                placeholder="Enter image URL..."
-                className="flex-1 w-64 h-8 p-1 border rounded shadow-none focus:outline-none"
-                autoFocus
-              />
-              <button
-                onClick={insertImage}
-                className="px-2 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
-              >
-                Insert
-              </button>
-            </div>
-            <div className="text-center">
-              <span className="text-xs text-gray-400">or</span>
-            </div>
+          <div className="flex gap-1">
+            <Input
+              type="text"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              onKeyDown={handleImageKeyDown}
+              placeholder="Enter image URL..."
+              className="flex-1 w-64 h-6 p-1 border-none rounded shadow-none focus:outline-none focus-visible:ring-0"
+              autoFocus
+            />
+            <div className="h-6 w-[1px] bg-stone-300"></div>
+            <button
+              onClick={insertImage}
+              className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
+            >
+              <FaCheck />
+            </button>
+            <button
+              onClick={() => setShowImageInput(false)}
+              className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
+            >
+              <IoClose className="text-lg" />
+            </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-2 py-1 text-sm text-white bg-green-500 rounded hover:bg-green-600"
+              className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
             >
-              Upload image
+              <FiImage />
             </button>
           </div>
         </div>
