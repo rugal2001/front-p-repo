@@ -815,11 +815,13 @@ const Tiptap = () => {
               onClick={item.onClick}
               className={`p-1 text-lg rounded-md cursor-pointer flex gap-x-2 items-center  w-full ${
                 item.isActive()
-                  ? "bg-orange-100 text-orange-600"
-                  : "text-gray-800 hover:bg-gray-200 hover:text-orange-600"
+                  ? "bg-indigo-100 text-indigo-600"
+                  : "text-gray-800 hover:bg-gray-200 hover:text-indigo-600"
               }`}
             >
-              <div className="text-orange-600 bg-orange-100">{item.icon}</div>
+              <div className="p-1 text-indigo-600 rounded-md bg-indigo-50">
+                {item.icon}
+              </div>
               <span className="text-sm">{item.label}</span>
             </div>
           ))}
@@ -834,7 +836,7 @@ const Tiptap = () => {
               onClick={item.onClick}
               className={`p-1 text-lg rounded-md cursor-pointer ${
                 item.isActive()
-                  ? "bg-orange-100 text-orange-600"
+                  ? "bg-indigo-100 text-indigo-600"
                   : "text-gray-800 hover:bg-gray-200"
               }`}
             >
