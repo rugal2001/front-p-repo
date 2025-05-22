@@ -14,6 +14,7 @@ import Bold from "@tiptap/extension-bold";
 import BulletList from "@tiptap/extension-bullet-list";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Image from "@tiptap/extension-image";
+
 import Italic from "@tiptap/extension-italic";
 import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
@@ -366,7 +367,7 @@ const extensions = [
     // Use different placeholders depending on the node type:
     // placeholder: ({ node }) => {
     //   if (node.type.name === 'heading') {
-    //     return 'What’s the title?'
+    //     return 'What's the title?'
     //   }
 
     //   return 'Can you add some further context?'
@@ -712,46 +713,57 @@ const Tiptap = () => {
     {
       icon: <LuHeading1 />,
       onClick: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
+      isActive: () => editor.isActive("heading", { level: 1 }),
     },
     {
       icon: <LuHeading2 />,
       onClick: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+      isActive: () => editor.isActive("heading", { level: 2 }),
     },
     {
       icon: <LuHeading3 />,
       onClick: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
+      isActive: () => editor.isActive("heading", { level: 3 }),
     },
     {
       icon: <LuBold />,
       onClick: () => editor.chain().focus().toggleBold().run(),
+      isActive: () => editor.isActive("bold"),
     },
     {
       icon: <LuItalic />,
       onClick: () => editor.chain().focus().toggleItalic().run(),
+      isActive: () => editor.isActive("italic"),
     },
     {
       icon: <LuUnderline />,
       onClick: () => editor.chain().focus().toggleUnderline().run(),
+      isActive: () => editor.isActive("underline"),
     },
     {
       icon: <LuSeparatorHorizontal />,
       onClick: () => editor.chain().focus().setHorizontalRule().run(),
+      isActive: () => false, // Horizontal rule doesn't have an active state
     },
     {
       icon: <MdFormatListBulleted />,
       onClick: () => editor.chain().focus().toggleBulletList().run(),
+      isActive: () => editor.isActive("bulletList"),
     },
     {
       icon: <MdCode />,
       onClick: toggleCodeBlock,
+      isActive: () => editor.isActive("codeBlock"),
     },
     {
       icon: <MdLink />,
       onClick: openLinkMenu,
+      isActive: () => editor.isActive("link"),
     },
     {
       icon: <FiImage />,
       onClick: openImageMenu,
+      isActive: () => false, // Image insertion doesn't have an active state
     },
   ];
 
@@ -785,7 +797,11 @@ const Tiptap = () => {
             <div
               key={index}
               onClick={item.onClick}
-              className="p-1 text-lg text-gray-800 rounded-md cursor-pointer hover:bg-gray-200"
+              className={`p-1 text-lg rounded-md cursor-pointer ${
+                item.isActive()
+                  ? "bg-blue-100 text-blue-600"
+                  : "text-gray-800 hover:bg-gray-200"
+              }`}
             >
               {item.icon}
             </div>
@@ -799,7 +815,11 @@ const Tiptap = () => {
             <div
               key={index}
               onClick={item.onClick}
-              className="p-1 text-lg text-gray-800 rounded-md cursor-pointer hover:bg-gray-200"
+              className={`p-1 text-lg rounded-md cursor-pointer ${
+                item.isActive()
+                  ? "bg-blue-100 text-blue-600"
+                  : "text-gray-800 hover:bg-gray-200"
+              }`}
             >
               {item.icon}
             </div>
