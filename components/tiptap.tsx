@@ -57,7 +57,16 @@ const Tiptap = () => {
     <>
       <EditorContent className="w-full h-screen tiptap" editor={editor} />
       <FloatingMenu editor={editor}>
-        <span className="text-sm text-gray-500">This is the floating menu</span>
+        <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow">
+          {MenuItems.map((item) => (
+            <div
+              onClick={item.onClick}
+              className="p-1 text-lg text-gray-800 rounded-md hover:bg-gray-200"
+            >
+              {item.icon}
+            </div>
+          ))}
+        </div>
       </FloatingMenu>
       <BubbleMenu editor={editor}>
         <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow">
