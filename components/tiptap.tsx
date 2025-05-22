@@ -12,7 +12,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Bold from "@tiptap/extension-bold";
 import Italic from "@tiptap/extension-italic";
 import Underline from "@tiptap/extension-underline";
-
+import Image from "@tiptap/extension-image";
 import BulletList from "@tiptap/extension-bullet-list";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Link from "@tiptap/extension-link";
@@ -190,6 +190,12 @@ const extensions = [
       },
     },
   }),
+  Image.configure({
+    HTMLAttributes: {
+      class: "rounded-lg shadow-lg border-[1px] border-gray-400",
+    },
+    allowBase64: true,
+  }),
   Bold.configure({
     HTMLAttributes: {
       class: "font-bold",
@@ -230,6 +236,7 @@ const extensions = [
 
 const content = `
 <h1>Heading 1</h1>
+<img src="https://placehold.co/800x400/6A00F5/white" />
 <h2>1. Inline <code>&lt;code&gt;</code></h2>
     <p>You can use <code>&lt;code&gt;</code> to style short snippets like <code>const x = 42;</code>.</p>
 
