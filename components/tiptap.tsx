@@ -424,7 +424,7 @@ const extensions = [
 
 const content = `
 <h1>Heading 1</h1>
-<img src="https://placehold.co/800x400/6A00F5/white" width="800" height="400" />
+<img src="https://giffiles.alphacoders.com/208/208014.gif" width="800" height="400" />
 <h2>1. Inline <code>&lt;code&gt;</code></h2>
     <p>You can use <code>&lt;code&gt;</code> to style short snippets like <code>const x = 42;</code>.</p>
 
