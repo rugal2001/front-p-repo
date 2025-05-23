@@ -1461,7 +1461,7 @@ const Tiptap = () => {
                   key={index}
                   onClick={item.onClick}
                   className={`p-1 text-lg rounded-md cursor-pointer flex gap-x-2 items-center  w-full ${
-                    item.color ? `text-${item.color}-500` : ""
+                    !!item.color ? `text-${item.color}-500` : ""
                   } ${
                     item.isActive() && !item.color
                       ? "bg-indigo-100 text-indigo-600"
@@ -1470,7 +1470,7 @@ const Tiptap = () => {
                 >
                   <div
                     className={`p-1 rounded-md  ${
-                      item.color
+                      !!item.color
                         ? `text-${item.color}-500 bg-${item.color}-50`
                         : "text-indigo-600 bg-indigo-50"
                     }`}
@@ -1496,7 +1496,7 @@ const Tiptap = () => {
                   key={index}
                   onClick={item.onClick}
                   className={`p-1 text-lg rounded-md cursor-pointer 
-                ${item.color ? `text-${item.color}-500` : ""}
+                ${!!item.color ? `text-${item.color}-500` : ""}
                 ${
                   item.isActive() && !item.color
                     ? "bg-indigo-100 text-indigo-600"
