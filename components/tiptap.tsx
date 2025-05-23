@@ -1451,7 +1451,7 @@ const Tiptap = () => {
           placement: "top-start",
         }}
       >
-        <div className="flex flex-col items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow h-60 w-40 overflow-y-auto">
+        <div className="flex flex-col items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow h-60 w-48 overflow-y-auto">
           {MenuItems.map((item, index) => (
             <>
               {item.function === "DEVIDER" ? (
