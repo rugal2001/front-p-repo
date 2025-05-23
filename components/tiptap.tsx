@@ -14,6 +14,7 @@ import Bold from "@tiptap/extension-bold";
 import BulletList from "@tiptap/extension-bullet-list";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Image from "@tiptap/extension-image";
+import Youtube from "@tiptap/extension-youtube";
 
 import Italic from "@tiptap/extension-italic";
 import Link from "@tiptap/extension-link";
@@ -22,7 +23,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { common, createLowlight } from "lowlight";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FaCheck } from "react-icons/fa6";
+import { FaCheck, FaYoutube } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
 import {
   LuBold,
@@ -34,6 +35,7 @@ import {
   LuMinus,
   LuSeparatorHorizontal,
 } from "react-icons/lu";
+import { PiVideo } from "react-icons/pi";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { MdCode, MdFormatListBulleted, MdImage, MdLink } from "react-icons/md";
 import { FiImage } from "react-icons/fi";
@@ -46,6 +48,7 @@ import typescript from "highlight.js/lib/languages/typescript";
 import xml from "highlight.js/lib/languages/xml";
 import { Input } from "./shadcn/input";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Node, mergeAttributes } from "@tiptap/core";
 
 // Create lowlight instance with all languages
 const lowlight = createLowlight(common);
@@ -312,6 +315,14 @@ const ResizableImageComponent: React.FC<ResizableImageProps> = ({
             }}
           />
         )}
+        {isResizing && (
+          <div
+            className="absolute px-2 py-1 text-xs text-white bg-black bg-opacity-75 rounded top-2 left-2"
+            style={{ zIndex: 101 }}
+          >
+            {node.attrs.width} × {node.attrs.height}
+          </div>
+        )}
       </div>
     </NodeViewWrapper>
   );
@@ -346,6 +357,387 @@ const ResizableImage = Image.extend({
           });
         },
     };
+  },
+});
+
+// Custom resizable video component
+interface ResizableVideoProps {
+  node: ProseMirrorNode;
+  updateAttributes: (attrs: { [key: string]: any }) => void;
+  editor: Editor;
+}
+
+const ResizableVideoComponent: React.FC<ResizableVideoProps> = ({
+  node,
+  updateAttributes,
+  editor,
+}) => {
+  const [isResizing, setIsResizing] = useState(false);
+  const [initialWidth, setInitialWidth] = useState(0);
+  const [initialHeight, setInitialHeight] = useState(0);
+  const [initialX, setInitialX] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Set initial dimensions when component mounts
+  useEffect(() => {
+    if (videoRef.current) {
+      // If video doesn't have width/height attributes yet, set them from the natural dimensions
+      if (!node.attrs.width || !node.attrs.height) {
+        const video = videoRef.current;
+        video.onloadedmetadata = () => {
+          updateAttributes({
+            width: video.videoWidth || 640,
+            height: video.videoHeight || 360,
+          });
+        };
+      }
+    }
+  }, [node.attrs.src]);
+
+  const startResizing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!videoRef.current) return;
+
+    setIsResizing(true);
+    setInitialWidth(videoRef.current.offsetWidth);
+    setInitialHeight(videoRef.current.offsetHeight);
+    setInitialX(e.clientX);
+  };
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing || !videoRef.current) return;
+
+      const widthChange = e.clientX - initialX;
+      const newWidth = Math.max(200, initialWidth + widthChange); // Minimum width of 200px
+
+      // Apply aspect ratio to maintain proportions
+      const aspectRatio = initialWidth / initialHeight;
+      const newHeight = Math.round(newWidth / aspectRatio);
+
+      updateAttributes({
+        width: newWidth,
+        height: newHeight,
+      });
+    },
+    [isResizing, initialWidth, initialHeight, initialX, updateAttributes]
+  );
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  // Add and remove event listeners
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", stopResizing);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", stopResizing);
+    };
+  }, [isResizing, handleMouseMove, stopResizing]);
+
+  return (
+    <NodeViewWrapper>
+      <div
+        className="relative resizable-video-wrapper group"
+        style={{
+          display: "block",
+          margin: "1rem 0",
+          textAlign: "center",
+        }}
+      >
+        <video
+          ref={videoRef}
+          src={node.attrs.src}
+          width={node.attrs.width || 640}
+          height={node.attrs.height || 360}
+          controls
+          className="rounded-lg shadow border-[1px] border-gray-200"
+          style={{ display: "inline-block", maxWidth: "100%" }}
+        />
+        {editor.isEditable && (
+          <>
+            <div
+              onMouseDown={startResizing}
+              className={`absolute top-1/2 left-0 w-2 h-12  -translate-y-1/2 bg-white opacity-0 group-hover:opacity-100 rounded-full ml-1 shadow-lg border border-gray-200 ${
+                isResizing ? " cursor-col-resize" : " cursor-col-resize"
+              }`}
+            />
+            <div
+              onMouseDown={startResizing}
+              className={`absolute top-1/2 right-0 w-2 h-12  -translate-y-1/2 bg-white opacity-0 group-hover:opacity-100 rounded-full mr-1 shadow-lg border border-gray-200 ${
+                isResizing ? " cursor-col-resize" : " cursor-col-resize"
+              }`}
+            />
+          </>
+        )}
+        {isResizing && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 100,
+              cursor: "col-resize",
+            }}
+          />
+        )}
+        {isResizing && (
+          <div
+            className="absolute px-2 py-1 text-xs text-white bg-black bg-opacity-75 rounded top-2 left-2"
+            style={{ zIndex: 101 }}
+          >
+            {node.attrs.width} × {node.attrs.height}
+          </div>
+        )}
+      </div>
+    </NodeViewWrapper>
+  );
+};
+
+// Custom resizable YouTube component
+interface ResizableYoutubeProps {
+  node: ProseMirrorNode;
+  updateAttributes: (attrs: { [key: string]: any }) => void;
+  editor: Editor;
+}
+
+const ResizableYoutubeComponent: React.FC<ResizableYoutubeProps> = ({
+  node,
+  updateAttributes,
+  editor,
+}) => {
+  const [isResizing, setIsResizing] = useState(false);
+  const [initialWidth, setInitialWidth] = useState(0);
+  const [initialHeight, setInitialHeight] = useState(0);
+  const [initialX, setInitialX] = useState(0);
+  const [resizeDirection, setResizeDirection] = useState<"left" | "right">(
+    "right"
+  );
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Convert YouTube URL to embed format
+  const getEmbedUrl = (url: string) => {
+    if (!url) return "";
+
+    // If it's already an embed URL, return it
+    if (url.includes("youtube.com/embed/")) {
+      return url;
+    }
+
+    // Extract video ID from various YouTube URL formats
+    const videoIdMatch = url.match(
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
+    );
+    if (videoIdMatch && videoIdMatch[1]) {
+      return `https://www.youtube.com/embed/${videoIdMatch[1]}`;
+    }
+
+    return url; // Return original if no match found
+  };
+
+  // Set initial dimensions when component mounts
+  useEffect(() => {
+    if (!node.attrs.width || !node.attrs.height) {
+      updateAttributes({
+        width: 640,
+        height: 480,
+      });
+    }
+  }, [node.attrs.src]);
+
+  const startResizing = (e: React.MouseEvent, direction: "left" | "right") => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!iframeRef.current) return;
+
+    setIsResizing(true);
+    setResizeDirection(direction);
+    setInitialWidth(iframeRef.current.offsetWidth);
+    setInitialHeight(iframeRef.current.offsetHeight);
+    setInitialX(e.clientX);
+  };
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing || !iframeRef.current) return;
+
+      const widthChange = e.clientX - initialX;
+      let newWidth;
+
+      if (resizeDirection === "right") {
+        newWidth = Math.max(320, initialWidth + widthChange);
+      } else {
+        newWidth = Math.max(320, initialWidth - widthChange);
+      }
+
+      // YouTube maintains 16:9 aspect ratio
+      const aspectRatio = 16 / 9;
+      const newHeight = Math.round(newWidth / aspectRatio);
+
+      updateAttributes({
+        width: newWidth,
+        height: newHeight,
+      });
+    },
+    [
+      isResizing,
+      initialWidth,
+      initialHeight,
+      initialX,
+      resizeDirection,
+      updateAttributes,
+    ]
+  );
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
+  // Add and remove event listeners
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", stopResizing);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", stopResizing);
+    };
+  }, [isResizing, handleMouseMove, stopResizing]);
+
+  const embedUrl = getEmbedUrl(node.attrs.src);
+
+  return (
+    <NodeViewWrapper>
+      <div
+        className="relative resizable-youtube-wrapper group"
+        style={{
+          display: "block",
+          margin: "1rem 0",
+          textAlign: "center",
+        }}
+      >
+        <iframe
+          ref={iframeRef}
+          src={embedUrl}
+          width={node.attrs.width || 640}
+          height={node.attrs.height || 480}
+          allowFullScreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          className="rounded-lg shadow border-[1px] border-gray-200"
+          style={{
+            display: "inline-block",
+            width: `${node.attrs.width || 640}px`,
+            height: `${node.attrs.height || 480}px`,
+            maxWidth: "100%",
+          }}
+          frameBorder="0"
+        />
+        {editor.isEditable && (
+          <>
+            <div
+              onMouseDown={(e) => startResizing(e, "left")}
+              className={`absolute top-1/2 left-0 w-3 h-16 -translate-y-1/2 bg-white opacity-0 group-hover:opacity-70 hover:opacity-90 rounded-full -ml-1 shadow-lg border border-gray-300 cursor-col-resize transition-opacity duration-200 `}
+              style={{ zIndex: 10 }}
+            />
+            <div
+              onMouseDown={(e) => startResizing(e, "right")}
+              className={`absolute top-1/2 right-0 w-3 h-16 -translate-y-1/2 bg-white opacity-0 group-hover:opacity-70 hover:opacity-90 rounded-full -mr-1 shadow-lg border border-gray-300 cursor-col-resize transition-opacity duration-200`}
+              style={{ zIndex: 10 }}
+            />
+          </>
+        )}
+        {isResizing && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 100,
+              cursor: "col-resize",
+            }}
+          />
+        )}
+        {isResizing && (
+          <div
+            className="absolute px-3 py-2 text-sm text-white bg-black rounded-lg bg-opacity-80 top-4 left-4"
+            style={{ zIndex: 101 }}
+          >
+            {node.attrs.width} × {node.attrs.height}
+          </div>
+        )}
+      </div>
+    </NodeViewWrapper>
+  );
+};
+
+const Video = Node.create({
+  name: "video",
+
+  group: "block",
+  inline: false,
+  atom: true,
+  draggable: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      width: {
+        default: null,
+      },
+      height: {
+        default: null,
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "video",
+      },
+    ];
+  },
+
+  renderHTML({ node }) {
+    return ["video", mergeAttributes({ controls: true }, node.attrs)];
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableVideoComponent);
+  },
+});
+
+// Define custom YouTube extension with resizing capability
+const ResizableYoutube = Youtube.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: 640,
+      },
+      height: {
+        default: 480,
+      },
+    };
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableYoutubeComponent);
   },
 });
 
@@ -420,11 +812,26 @@ const extensions = [
       rel: "noopener noreferrer",
     },
   }),
+  ResizableYoutube.configure({
+    controls: true,
+    nocookie: false,
+    allowFullscreen: true,
+    width: 640,
+    height: 480,
+    HTMLAttributes: {
+      class: "rounded-lg shadow border-[1px] border-gray-400 mt-2",
+    },
+  }),
+  Video,
 ];
 
 const content = `
 <h1>Heading 1</h1>
 <img src="https://giffiles.alphacoders.com/208/208014.gif" width="800" height="400" />
+
+<h2>Sample Video (Resizable)</h2>
+<video src="https://www.w3schools.com/html/mov_bbb.mp4" width="640" height="360" controls></video>
+
 <h2>1. Inline <code>&lt;code&gt;</code></h2>
     <p>You can use <code>&lt;code&gt;</code> to style short snippets like <code>const x = 42;</code>.</p>
 
@@ -469,6 +876,12 @@ const Tiptap = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [imagePosition, setImagePosition] = useState({ top: 0, left: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
+  const [showVideoInput, setShowVideoInput] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoPosition, setVideoPosition] = useState({ top: 0, left: 0 });
+  const [height, setHeight] = useState("480");
+  const [width, setWidth] = useState("640");
 
   const editor = useEditor({
     extensions,
@@ -521,6 +934,77 @@ const Tiptap = () => {
       .ProseMirror h2.is-editor-selected,
       .ProseMirror h3.is-editor-selected {
         background-color: rgba(59, 130, 246, 0.1);
+      }
+
+      /* Video wrapper styles */
+      .resizable-video-wrapper {
+        margin: 1rem 0;
+        text-align: center;
+        width: auto;
+      }
+      
+      .resizable-video-wrapper video {
+        max-width: 100%;
+        height: auto;
+        transition: opacity 0.2s ease;
+      }
+      
+      .resizable-video-wrapper:hover video {
+        opacity: 0.9;
+      }
+      
+      /* Video selection styles */
+      .ProseMirror video.is-editor-selected {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+      }
+
+      /* Video resize handles */
+      .resizable-video-wrapper .group:hover .opacity-0 {
+        opacity: 1;
+        transition: opacity 0.2s ease;
+      }
+      
+      /* Improved video wrapper selection */
+      .resizable-video-wrapper.ProseMirror-selectednode {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+        border-radius: 8px;
+      }
+
+      /* YouTube wrapper styles */
+      .resizable-youtube-wrapper {
+        margin: 1rem 0;
+        text-align: center;
+        width: auto;
+      }
+      
+      .resizable-youtube-wrapper iframe {
+        max-width: 100%;
+        transition: opacity 0.2s ease;
+      }
+      
+      .resizable-youtube-wrapper:hover iframe {
+        opacity: 0.9;
+      }
+      
+      /* YouTube selection styles */
+      .ProseMirror iframe.is-editor-selected {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+      }
+
+      /* YouTube resize handles */
+      .resizable-youtube-wrapper .group:hover .opacity-0 {
+        opacity: 1;
+        transition: opacity 0.2s ease;
+      }
+      
+      /* Improved YouTube wrapper selection */
+      .resizable-youtube-wrapper.ProseMirror-selectednode {
+        outline: 2px solid #3b82f6;
+        outline-offset: 2px;
+        border-radius: 8px;
       }
     `;
     document.head.appendChild(style);
@@ -691,6 +1175,66 @@ const Tiptap = () => {
     }
   };
 
+  const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+
+        // Create a temporary video element to get natural dimensions
+        const tempVideo = document.createElement("video");
+        tempVideo.onloadedmetadata = () => {
+          editor
+            .chain()
+            .focus()
+            .insertContent({
+              type: "video",
+              attrs: {
+                src: result,
+                width: tempVideo.videoWidth || 640,
+                height: tempVideo.videoHeight || 360,
+              },
+            })
+            .run();
+
+          // Reset the input value so the same file can be selected again if needed
+          if (videoFileInputRef.current) {
+            videoFileInputRef.current.value = "";
+          }
+
+          // Close the video input popup
+          setShowVideoInput(false);
+          setVideoUrl("");
+        };
+        tempVideo.onerror = () => {
+          // If video fails to load metadata, insert with default dimensions
+          editor
+            .chain()
+            .focus()
+            .insertContent({
+              type: "video",
+              attrs: {
+                src: result,
+                width: 640,
+                height: 360,
+              },
+            })
+            .run();
+
+          // Reset the input and close popup
+          if (videoFileInputRef.current) {
+            videoFileInputRef.current.value = "";
+          }
+          setShowVideoInput(false);
+          setVideoUrl("");
+        };
+        tempVideo.src = result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleClickOutsideImage = (e: React.MouseEvent) => {
     // Close the image input if clicked outside
     const target = e.target as Element;
@@ -706,6 +1250,55 @@ const Tiptap = () => {
     } else if (e.key === "Escape") {
       e.preventDefault();
       setShowImageInput(false);
+    }
+  };
+
+  const openVideoMenu = () => {
+    // Get current selection position
+    const { view } = editor;
+    if (view && view.state) {
+      const { from } = view.state.selection;
+      const coords = view.coordsAtPos(from);
+
+      // Set position for popup
+      setVideoPosition({
+        top: coords.bottom + 10,
+        left: coords.left,
+      });
+
+      // Show the input
+      setShowVideoInput(true);
+    }
+  };
+
+  const insertVideo = () => {
+    if (videoUrl) {
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: "video",
+          attrs: {
+            src: videoUrl,
+            width: 640, // Default width
+            height: 360, // Default height
+          },
+        })
+        .run();
+      setVideoUrl("");
+      setShowVideoInput(false);
+    }
+  };
+
+  const addYoutubeVideo = () => {
+    const url = prompt("Enter YouTube URL");
+
+    if (url) {
+      editor.commands.setYoutubeVideo({
+        src: url,
+        width: Math.max(320, parseInt(width, 10)) || 640,
+        height: Math.max(180, parseInt(height, 10)) || 480,
+      });
     }
   };
 
@@ -729,6 +1322,13 @@ const Tiptap = () => {
       isActive: () => editor.isActive("heading", { level: 3 }),
     },
     {
+      icon: null,
+      label: "DEVIDER",
+      function: "DEVIDER",
+      onClick: () => void 0,
+      isActive: () => false,
+    },
+    {
       icon: <LuBold />,
       label: "Bold",
       onClick: () => editor.chain().focus().toggleBold().run(),
@@ -745,6 +1345,13 @@ const Tiptap = () => {
       label: "Underline",
       onClick: () => editor.chain().focus().toggleUnderline().run(),
       isActive: () => editor.isActive("underline"),
+    },
+    {
+      icon: null,
+      label: "DEVIDER",
+      function: "DEVIDER",
+      onClick: () => void 0,
+      isActive: () => false,
     },
     {
       icon: <LuSeparatorHorizontal />,
@@ -771,12 +1378,39 @@ const Tiptap = () => {
       isActive: () => editor.isActive("link"),
     },
     {
+      icon: null,
+      label: "DEVIDER",
+      function: "DEVIDER",
+      onClick: () => void 0,
+      isActive: () => false,
+    },
+    {
       icon: <FiImage />,
       label: "Image",
       onClick: openImageMenu,
       isActive: () => false, // Image insertion doesn't have an active state
     },
+    {
+      icon: <PiVideo />,
+      label: "Video",
+      onClick: openVideoMenu,
+      isActive: () => false, // Video insertion doesn't have an active state
+    },
+    {
+      icon: <FaYoutube />,
+      label: "Youtube",
+      color: "red",
+      onClick: addYoutubeVideo,
+      isActive: () => false, // Video insertion doesn't have an active state
+    },
   ];
+
+  const handleVideoKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      insertVideo();
+    }
+  };
 
   return (
     <div
@@ -798,6 +1432,15 @@ const Tiptap = () => {
         onChange={handleFileUpload}
       />
 
+      {/* File input for video uploads (hidden but triggered via button) */}
+      <input
+        type="file"
+        accept="video/*"
+        ref={videoFileInputRef}
+        style={{ display: "none" }}
+        onChange={handleVideoFileUpload}
+      />
+
       <div className="overflow-y-auto tiptap-editor-container">
         <EditorContent className="w-full tiptap" editor={editor} />
       </div>
@@ -810,38 +1453,60 @@ const Tiptap = () => {
       >
         <div className="flex flex-col items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow h-60 w-40 overflow-y-auto">
           {MenuItems.map((item, index) => (
-            <div
-              key={index}
-              onClick={item.onClick}
-              className={`p-1 text-lg rounded-md cursor-pointer flex gap-x-2 items-center  w-full ${
-                item.isActive()
-                  ? "bg-indigo-100 text-indigo-600"
-                  : "text-gray-800 hover:bg-gray-200 hover:text-indigo-600"
-              }`}
-            >
-              <div className="p-1 text-indigo-600 rounded-md bg-indigo-50">
-                {item.icon}
-              </div>
-              <span className="text-sm">{item.label}</span>
-            </div>
+            <>
+              {item.function === "DEVIDER" ? (
+                <div className="w-full h-2  bg-gray-200 my-1 border-b-[1px] border-gray-200 "></div>
+              ) : (
+                <div
+                  key={index}
+                  onClick={item.onClick}
+                  className={`p-1 text-lg rounded-md cursor-pointer flex gap-x-2 items-center  w-full ${
+                    item.color ? `text-${item.color}-500` : ""
+                  } ${
+                    item.isActive() && !item.color
+                      ? "bg-indigo-100 text-indigo-600"
+                      : "text-gray-800 hover:bg-gray-200 hover:text-indigo-600"
+                  }`}
+                >
+                  <div
+                    className={`p-1 rounded-md  ${
+                      item.color
+                        ? `text-${item.color}-500 bg-${item.color}-50`
+                        : "text-indigo-600 bg-indigo-50"
+                    }`}
+                  >
+                    {item.icon}
+                  </div>
+                  <span className="text-sm">{item.label}</span>
+                </div>
+              )}
+            </>
           ))}
         </div>
       </FloatingMenu>
 
       <BubbleMenu editor={editor}>
-        <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow">
+        <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow w-96">
           {MenuItems.map((item, index) => (
-            <div
-              key={index}
-              onClick={item.onClick}
-              className={`p-1 text-lg rounded-md cursor-pointer ${
-                item.isActive()
-                  ? "bg-indigo-100 text-indigo-600"
-                  : "text-gray-800 hover:bg-gray-200"
-              }`}
-            >
-              {item.icon}
-            </div>
+            <>
+              {item.function === "DEVIDER" ? (
+                <div className="w-[1px] h-6  bg-gray-200 my-1 border-b-[1px] border-gray-200"></div>
+              ) : (
+                <div
+                  key={index}
+                  onClick={item.onClick}
+                  className={`p-1 text-lg rounded-md cursor-pointer 
+                ${item.color ? `text-${item.color}-500` : ""}
+                ${
+                  item.isActive() && !item.color
+                    ? "bg-indigo-100 text-indigo-600"
+                    : "text-gray-800 hover:bg-gray-200"
+                }`}
+                >
+                  {item.icon}
+                </div>
+              )}
+            </>
           ))}
         </div>
       </BubbleMenu>
@@ -926,6 +1591,48 @@ const Tiptap = () => {
               className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
             >
               <FiImage />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showVideoInput && (
+        <div
+          className="fixed z-50 p-1 bg-white border border-gray-200 rounded-md shadow image-input-popup"
+          style={{
+            top: videoPosition.top + "px",
+            left: videoPosition.left + "px",
+          }}
+        >
+          <div className="flex gap-1">
+            <Input
+              type="text"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              onKeyDown={handleVideoKeyDown}
+              placeholder="Enter video URL..."
+              className="flex-1 w-64 h-6 p-1 border-none rounded shadow-none focus:outline-none focus-visible:ring-0"
+              autoFocus
+            />
+            <div className="h-6 w-[1px] bg-stone-300"></div>
+            <button
+              onClick={insertVideo}
+              className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
+            >
+              <FaCheck />
+            </button>
+            <button
+              onClick={() => setShowVideoInput(false)}
+              className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
+            >
+              <IoClose className="text-lg" />
+            </button>
+            <button
+              onClick={() => videoFileInputRef.current?.click()}
+              className="px-1 py-1 text-sm text-gray-700 rounded hover:bg-gray-200"
+              title="Upload video file"
+            >
+              <PiVideo />
             </button>
           </div>
         </div>
