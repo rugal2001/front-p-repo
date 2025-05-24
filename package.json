@@ -10,6 +10,7 @@
     "dev:watch": "nodemon --watch 'pages/**/*' --watch 'components/**/*' --ext 'ts,tsx,js,jsx' --exec 'npm run dev'"
   },
   "dependencies": {
+    "@radix-ui/react-tooltip": "^1.2.7",
     "@tiptap/extension-bold": "^2.12.0",
     "@tiptap/extension-bullet-list": "^2.12.0",
     "@tiptap/extension-code-block-lowlight": "^2.12.0",

@@ -71,6 +71,7 @@ import xml from "highlight.js/lib/languages/xml";
 import { Input } from "./shadcn/input";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Node, mergeAttributes } from "@tiptap/core";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./shadcn/tooltip";
 
 // Create lowlight instance with all languages
 const lowlight = createLowlight(common);
@@ -1485,6 +1486,84 @@ const Tiptap = () => {
     }
   };
 
+  const tableMenuItems = [
+    {
+      icon: <AiOutlineInsertRowLeft />,
+      label: "Col Before",
+      color: "blue",
+      onClick: () => editor.chain().focus().addColumnBefore().run(),
+    },
+    {
+      icon: <AiOutlineInsertRowRight />,
+      label: "Col After",
+      color: "blue",
+      onClick: () => editor.chain().focus().addColumnAfter().run(),
+    },
+    {
+      icon: <TbColumnRemove />,
+      label: "Del Col",
+      color: "red",
+      onClick: () => editor.chain().focus().deleteColumn().run(),
+    },
+    {
+      icon: null,
+      label: "DEVIDER",
+      function: "DEVIDER",
+      onClick: () => void 0,
+      isActive: () => false,
+    },
+    {
+      icon: <AiOutlineInsertRowAbove />,
+      label: "Row Before",
+      color: "blue",
+      onClick: () => editor.chain().focus().addRowBefore().run(),
+    },
+    {
+      icon: <AiOutlineInsertRowBelow />,
+      label: "Row After",
+      color: "blue",
+      onClick: () => editor.chain().focus().addRowAfter().run(),
+    },
+    {
+      icon: <TbRowRemove />,
+      label: "Del Row",
+      color: "red",
+      onClick: () => editor.chain().focus().deleteRow().run(),
+    },
+    {
+      icon: null,
+      label: "DEVIDER",
+      function: "DEVIDER",
+      onClick: () => void 0,
+      isActive: () => false,
+    },
+    {
+      icon: <LuTableCellsMerge />,
+      label: "Merge",
+      color: "purple",
+      onClick: () => editor.chain().focus().mergeCells().run(),
+    },
+    {
+      icon: <LuTableCellsSplit />,
+      label: "Split",
+      color: "purple",
+      onClick: () => editor.chain().focus().splitCell().run(),
+    },
+    {
+      icon: null,
+      label: "DEVIDER",
+      function: "DEVIDER",
+      onClick: () => void 0,
+      isActive: () => false,
+    },
+    {
+      icon: <HiOutlineTrash />,
+      label: "Delete Table",
+      color: "red",
+      onClick: () => editor.chain().focus().deleteTable().run(),
+    },
+  ];
+
   return (
     <div
       className="tiptap-wrapper"
@@ -1562,81 +1641,47 @@ const Tiptap = () => {
       <BubbleMenu editor={editor} className="max-w-none">
         <div
           className={`flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow ${
-            editor.isActive("table") ? "" : "w-[400px]"
+            editor.isActive("table") ? "" : "w-[410px]"
           }`}
         >
           {editor.isActive("table") ? (
             <>
-              <button className="flex items-center gap-1 px-2 py-1 text-blue-700 transition-colors duration-200 rounded bg-blue-50 hover:bg-blue-100">
-                {/* Col Before */}
-                <AiOutlineInsertRowLeft />
-              </button>
-              <button
-                onClick={() => editor.chain().focus().addColumnAfter().run()}
-                className="flex items-center gap-1 px-2 py-1 text-blue-700 transition-colors duration-200 rounded bg-blue-50 hover:bg-blue-100"
-              >
-                {/* Col After */}
-                <AiOutlineInsertRowRight />
-              </button>
-              <button
-                onClick={() => editor.chain().focus().deleteColumn().run()}
-                className="px-2 py-1 text-red-700 transition-colors duration-200 rounded bg-red-50 hover:bg-red-100"
-              >
-                {/* Del Col */}
-                <TbColumnRemove />
-              </button>
-              <div className="w-[1px] h-6 bg-gray-300 mx-1"></div>
-              <button
-                onClick={() => editor.chain().focus().addRowBefore().run()}
-                className="flex items-center gap-1 px-2 py-1 text-green-700 transition-colors duration-200 rounded bg-green-50 hover:bg-green-100"
-              >
-                {/* Row Before */}
-                <AiOutlineInsertRowAbove />
-              </button>
-              <button
-                onClick={() => editor.chain().focus().addRowAfter().run()}
-                className="flex items-center gap-1 px-2 py-1 text-green-700 transition-colors duration-200 rounded bg-green-50 hover:bg-green-100"
-              >
-                {/* Row After */}
-                <AiOutlineInsertRowBelow />
-              </button>
-              <button
-                onClick={() => editor.chain().focus().deleteRow().run()}
-                className="px-2 py-1 text-red-700 transition-colors duration-200 rounded bg-red-50 hover:bg-red-100"
-              >
-                {/* Del Row */}
-                <TbRowRemove />
-              </button>
-              <div className="w-[1px] h-6 bg-gray-300 mx-1"></div>
-              <button
-                onClick={() => editor.chain().focus().mergeCells().run()}
-                className="px-2 py-1 text-purple-700 transition-colors duration-200 rounded bg-purple-50 hover:bg-purple-100"
-              >
-                {/* Merge */}
-                <LuTableCellsMerge />
-              </button>
-              <button
-                onClick={() => editor.chain().focus().splitCell().run()}
-                className="px-2 py-1 text-purple-700 transition-colors duration-200 rounded bg-purple-50 hover:bg-purple-100"
-              >
-                {/* Split/ */}
-                <LuTableCellsSplit />
-              </button>
-              <div className="w-[1px] h-6 bg-gray-300 mx-1"></div>
-              <button
-                onClick={() => editor.chain().focus().deleteTable().run()}
-                className="px-2 py-1 text-red-700 transition-colors duration-200 rounded bg-red-50 hover:bg-red-100"
-              >
-                {/* Delete Table */}
-                <HiOutlineTrash />
-              </button>
+              {tableMenuItems.map((item) => (
+                <>
+                  {item?.function === "DEVIDER" ? (
+                    <div className="w-[1px] h-6 bg-gray-300 mx-1"></div>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <button
+                          onClick={item.onClick}
+                          className={`px-2 py-1 transition-colors duration-200 rounded ${
+                            item.color === "red"
+                              ? "text-red-700 bg-red-50 hover:bg-red-100"
+                              : item.color === "blue"
+                              ? "text-blue-700 bg-blue-50 hover:bg-blue-100"
+                              : item.color === "green"
+                              ? "text-green-700 bg-green-50 hover:bg-green-100"
+                              : "text-purple-700 bg-purple-50 hover:bg-purple-100"
+                          }`}
+                        >
+                          {item.icon}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs text-white bg-black/50 ">
+                        {item.label}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </>
+              ))}
             </>
           ) : (
             // Regular menu items when not in a table
             MenuItems.map((item, index) => (
               <>
                 {item.function === "DEVIDER" ? (
-                  <div className="w-[1px] h-6  bg-gray-200 my-1 border-b-[1px] border-gray-200"></div>
+                  <div className="w-[1px] h-6  bg-gray-200 my-1 border-r-[1px] border-gray-200"></div>
                 ) : (
                   <div
                     key={index}
