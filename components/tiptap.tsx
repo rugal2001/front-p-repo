@@ -865,6 +865,7 @@ console.log(greet("World"));</code></pre>
     return f"Hello, {name}!"
 
 print(greet("World"))</code></pre>
+<h1>Heading 1</h1>
 `;
 
 const Tiptap = () => {
