@@ -9,6 +9,11 @@ import {
 } from "@tiptap/react";
 import { IoMdTrash } from "react-icons/io";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import Table from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableHeader from "@tiptap/extension-table-header";
+import TableCell from "@tiptap/extension-table-cell";
+import Gapcursor from "@tiptap/extension-gapcursor";
 
 import Bold from "@tiptap/extension-bold";
 import BulletList from "@tiptap/extension-bullet-list";
@@ -26,6 +31,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FaCheck, FaYoutube } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
 import {
+  AiOutlineInsertRowAbove,
+  AiOutlineInsertRowRight,
+  AiOutlineInsertRowBelow,
+  AiOutlineInsertRowLeft,
+} from "react-icons/ai";
+import {
   LuBold,
   LuHeading1,
   LuHeading2,
@@ -34,11 +45,22 @@ import {
   LuUnderline,
   LuMinus,
   LuSeparatorHorizontal,
+  LuTableCellsMerge,
+  LuTableCellsSplit,
 } from "react-icons/lu";
-import { PiVideo } from "react-icons/pi";
+import { PiColumnsPlusLeft, PiColumnsPlusRight, PiVideo } from "react-icons/pi";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { MdCode, MdFormatListBulleted, MdImage, MdLink } from "react-icons/md";
 import { FiImage } from "react-icons/fi";
+import { BiDockLeft, BiDockRight, BiTable } from "react-icons/bi";
+import { BsThreeDotsVertical, BsPlus } from "react-icons/bs";
+import { HiOutlineDotsHorizontal, HiOutlineTrash } from "react-icons/hi";
+import {
+  TbGripVertical,
+  TbGripHorizontal,
+  TbColumnRemove,
+  TbRowRemove,
+} from "react-icons/tb";
 
 // Import additional languages for syntax highlighting
 import css from "highlight.js/lib/languages/css";
@@ -684,6 +706,24 @@ const ResizableYoutubeComponent: React.FC<ResizableYoutubeProps> = ({
   );
 };
 
+// Define custom YouTube extension with resizing capability
+const ResizableYoutube = Youtube.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: 640,
+      },
+      height: {
+        default: 480,
+      },
+    };
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableYoutubeComponent);
+  },
+});
+
 const Video = Node.create({
   name: "video",
 
@@ -723,24 +763,6 @@ const Video = Node.create({
   },
 });
 
-// Define custom YouTube extension with resizing capability
-const ResizableYoutube = Youtube.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      width: {
-        default: 640,
-      },
-      height: {
-        default: 480,
-      },
-    };
-  },
-  addNodeView() {
-    return ReactNodeViewRenderer(ResizableYoutubeComponent);
-  },
-});
-
 // define your extension array
 const extensions = [
   StarterKit.configure({
@@ -751,6 +773,24 @@ const extensions = [
       HTMLAttributes: {
         class: "tiptap-heading",
       },
+    },
+  }),
+  Gapcursor,
+  Table.configure({
+    resizable: true,
+    HTMLAttributes: {
+      class: "tiptap-table",
+    },
+  }),
+  TableRow,
+  TableHeader.configure({
+    HTMLAttributes: {
+      class: "tiptap-table-header",
+    },
+  }),
+  TableCell.configure({
+    HTMLAttributes: {
+      class: "tiptap-table-cell",
     },
   }),
   Placeholder.configure({
@@ -828,6 +868,27 @@ const extensions = [
 const content = `
 <h1>Heading 1</h1>
 <img src="https://giffiles.alphacoders.com/208/208014.gif" width="800" height="400" />
+
+<h2>Sample Table</h2>
+<table class="tiptap-table">
+  <tbody>
+    <tr>
+      <th class="tiptap-table-header">Name</th>
+      <th class="tiptap-table-header">Role</th>
+      <th class="tiptap-table-header">Experience</th>
+    </tr>
+    <tr>
+      <td class="tiptap-table-cell">John Doe</td>
+      <td class="tiptap-table-cell">Developer</td>
+      <td class="tiptap-table-cell">5 years</td>
+    </tr>
+    <tr>
+      <td class="tiptap-table-cell">Jane Smith</td>
+      <td class="tiptap-table-cell">Designer</td>
+      <td class="tiptap-table-cell">3 years</td>
+    </tr>
+  </tbody>
+</table>
 
 <h2>Sample Video (Resizable)</h2>
 <video src="https://www.w3schools.com/html/mov_bbb.mp4" width="640" height="360" controls></video>
@@ -1379,6 +1440,17 @@ const Tiptap = () => {
       isActive: () => editor.isActive("link"),
     },
     {
+      icon: <BiTable />,
+      label: "Table",
+      onClick: () =>
+        editor
+          .chain()
+          .focus()
+          .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+          .run(),
+      isActive: () => editor.isActive("table"),
+    },
+    {
       icon: null,
       label: "DEVIDER",
       function: "DEVIDER",
@@ -1446,6 +1518,7 @@ const Tiptap = () => {
         <EditorContent className="w-full tiptap" editor={editor} />
       </div>
 
+      {/* Modern Floating Menu */}
       <FloatingMenu
         editor={editor}
         tippyOptions={{
@@ -1486,29 +1559,102 @@ const Tiptap = () => {
         </div>
       </FloatingMenu>
 
-      <BubbleMenu editor={editor}>
-        <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow w-96">
-          {MenuItems.map((item, index) => (
+      <BubbleMenu editor={editor} className="max-w-none">
+        <div
+          className={`flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow ${
+            editor.isActive("table") ? "" : "w-[400px]"
+          }`}
+        >
+          {editor.isActive("table") ? (
             <>
-              {item.function === "DEVIDER" ? (
-                <div className="w-[1px] h-6  bg-gray-200 my-1 border-b-[1px] border-gray-200"></div>
-              ) : (
-                <div
-                  key={index}
-                  onClick={item.onClick}
-                  className={`p-1 text-lg rounded-md cursor-pointer 
-                ${!!item.color ? `text-${item.color}-500` : ""}
-                ${
-                  item.isActive() && !item.color
-                    ? "bg-indigo-100 text-indigo-600"
-                    : "text-gray-800 hover:bg-gray-200"
-                }`}
-                >
-                  {item.icon}
-                </div>
-              )}
+              <button className="flex items-center gap-1 px-2 py-1 text-blue-700 transition-colors duration-200 rounded bg-blue-50 hover:bg-blue-100">
+                {/* Col Before */}
+                <AiOutlineInsertRowLeft />
+              </button>
+              <button
+                onClick={() => editor.chain().focus().addColumnAfter().run()}
+                className="flex items-center gap-1 px-2 py-1 text-blue-700 transition-colors duration-200 rounded bg-blue-50 hover:bg-blue-100"
+              >
+                {/* Col After */}
+                <AiOutlineInsertRowRight />
+              </button>
+              <button
+                onClick={() => editor.chain().focus().deleteColumn().run()}
+                className="px-2 py-1 text-red-700 transition-colors duration-200 rounded bg-red-50 hover:bg-red-100"
+              >
+                {/* Del Col */}
+                <TbColumnRemove />
+              </button>
+              <div className="w-[1px] h-6 bg-gray-300 mx-1"></div>
+              <button
+                onClick={() => editor.chain().focus().addRowBefore().run()}
+                className="flex items-center gap-1 px-2 py-1 text-green-700 transition-colors duration-200 rounded bg-green-50 hover:bg-green-100"
+              >
+                {/* Row Before */}
+                <AiOutlineInsertRowAbove />
+              </button>
+              <button
+                onClick={() => editor.chain().focus().addRowAfter().run()}
+                className="flex items-center gap-1 px-2 py-1 text-green-700 transition-colors duration-200 rounded bg-green-50 hover:bg-green-100"
+              >
+                {/* Row After */}
+                <AiOutlineInsertRowBelow />
+              </button>
+              <button
+                onClick={() => editor.chain().focus().deleteRow().run()}
+                className="px-2 py-1 text-red-700 transition-colors duration-200 rounded bg-red-50 hover:bg-red-100"
+              >
+                {/* Del Row */}
+                <TbRowRemove />
+              </button>
+              <div className="w-[1px] h-6 bg-gray-300 mx-1"></div>
+              <button
+                onClick={() => editor.chain().focus().mergeCells().run()}
+                className="px-2 py-1 text-purple-700 transition-colors duration-200 rounded bg-purple-50 hover:bg-purple-100"
+              >
+                {/* Merge */}
+                <LuTableCellsMerge />
+              </button>
+              <button
+                onClick={() => editor.chain().focus().splitCell().run()}
+                className="px-2 py-1 text-purple-700 transition-colors duration-200 rounded bg-purple-50 hover:bg-purple-100"
+              >
+                {/* Split/ */}
+                <LuTableCellsSplit />
+              </button>
+              <div className="w-[1px] h-6 bg-gray-300 mx-1"></div>
+              <button
+                onClick={() => editor.chain().focus().deleteTable().run()}
+                className="px-2 py-1 text-red-700 transition-colors duration-200 rounded bg-red-50 hover:bg-red-100"
+              >
+                {/* Delete Table */}
+                <HiOutlineTrash />
+              </button>
             </>
-          ))}
+          ) : (
+            // Regular menu items when not in a table
+            MenuItems.map((item, index) => (
+              <>
+                {item.function === "DEVIDER" ? (
+                  <div className="w-[1px] h-6  bg-gray-200 my-1 border-b-[1px] border-gray-200"></div>
+                ) : (
+                  <div
+                    key={index}
+                    onClick={item.onClick}
+                    className={`p-1 text-lg rounded-md cursor-pointer 
+                  ${!!item.color ? `text-${item.color}-500` : ""}
+                  ${
+                    item.isActive() && !item.color
+                      ? "bg-indigo-100 text-indigo-600"
+                      : "text-gray-800 hover:bg-gray-200"
+                  }`}
+                  >
+                    {item.icon}
+                  </div>
+                )}
+              </>
+            ))
+          )}
         </div>
       </BubbleMenu>
 

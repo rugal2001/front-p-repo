@@ -575,5 +575,331 @@
 .ProseMirror .is-editor-selected.horizontal-rule {
   background-color: #3b82f6;
 }
+
+/* Table Styling */
+.tiptap-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.tiptap-table-cell,
+.tiptap-table-header {
+  min-width: 1em;
+  border: 1px solid #e5e7eb;
+  padding: 8px 12px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+  background: white;
+}
+
+.tiptap-table-header {
+  font-weight: 600;
+  text-align: left;
+  background-color: #f9fafb;
+  color: #374151;
+}
+
+.tiptap-table-cell > *,
+.tiptap-table-header > * {
+  margin-bottom: 0;
+}
+
+/* Table selection styling */
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(59, 130, 246, 0.08);
+  pointer-events: none;
+}
+
+/* Column resize handle */
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  cursor: col-resize;
+  background-color: #3b82f6;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.ProseMirror td:hover .column-resize-handle,
+.ProseMirror th:hover .column-resize-handle {
+  opacity: 1;
+}
+
+/* Table hover effects */
+.tiptap-table:hover {
+  border-color: #d1d5db;
+}
+
+.tiptap-table-cell:hover,
+.tiptap-table-header:hover {
+  background-color: #f8fafc;
+}
+
+/* Table focus styling */
+.ProseMirror .tableWrapper {
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.ProseMirror .resize-cursor {
+  cursor: ew-resize;
+  cursor: col-resize;
+}
+
+/* Gap cursor for better table navigation */
+.ProseMirror .ProseMirror-gapcursor {
+  display: none;
+  pointer-events: none;
+  position: absolute;
+}
+
+.ProseMirror .ProseMirror-gapcursor:after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -2px;
+  width: 20px;
+  border-top: 1px solid black;
+  animation: ProseMirror-cursor-blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes ProseMirror-cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.ProseMirror .ProseMirror-gapcursor.ProseMirror-gapcursor-left:after {
+  left: -10px;
+}
+
+.ProseMirror .ProseMirror-gapcursor.ProseMirror-gapcursor-right:after {
+  right: -10px;
+}
+
+/* Improved table cell content */
+.tiptap-table-cell p,
+.tiptap-table-header p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Table responsive behavior */
+@media (max-width: 768px) {
+  .tiptap-table {
+    font-size: 14px;
+  }
+  
+  .tiptap-table-cell,
+  .tiptap-table-header {
+    padding: 6px 8px;
+  }
+}
+
+/* Table border styling when selected */
+.ProseMirror .is-editor-selected.tiptap-table {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Modern Table Wrapper Styling */
+.modern-table-wrapper {
+  position: relative;
+  margin: 2rem 0;
+  padding: 2rem 0 0 2rem;
+}
+
+/* Hover area for table controls */
+.modern-table-wrapper .table-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Column control styling */
+.modern-table-wrapper .absolute.-top-8 {
+  pointer-events: none;
+}
+
+.modern-table-wrapper .absolute.-top-8 > div {
+  pointer-events: auto;
+}
+
+/* Row control styling */
+.modern-table-wrapper .absolute.-left-8 {
+  pointer-events: none;
+}
+
+.modern-table-wrapper .absolute.-left-8 > div {
+  pointer-events: auto;
+}
+
+/* Enhanced button styling for controls */
+.modern-table-wrapper button {
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  font-family: inherit;
+}
+
+.modern-table-wrapper button:hover {
+  transform: scale(1.05);
+}
+
+/* Plus button styling */
+.modern-table-wrapper button.bg-blue-500 {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+}
+
+.modern-table-wrapper button.bg-blue-500:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  box-shadow: 0 6px 20px 0 rgba(59, 130, 246, 0.5);
+}
+
+/* Menu button styling */
+.modern-table-wrapper button.bg-gray-100 {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.modern-table-wrapper button.bg-gray-100:hover {
+  background: rgba(249, 250, 251, 0.95);
+  border-color: rgba(156, 163, 175, 0.8);
+}
+
+/* Dropdown menu styling */
+.modern-table-wrapper .absolute.top-full,
+.modern-table-wrapper .absolute.left-full {
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: slideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dropdown button styling */
+.modern-table-wrapper .absolute.top-full button,
+.modern-table-wrapper .absolute.left-full button {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  margin: 2px;
+}
+
+.modern-table-wrapper .absolute.top-full button:hover,
+.modern-table-wrapper .absolute.left-full button:hover {
+  transform: translateX(2px);
+}
+
+/* Delete button hover effect */
+.modern-table-wrapper button.text-red-600:hover {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  transform: scale(1.02);
+}
+
+/* Drag handle styling */
+.modern-table-wrapper .absolute.-top-8.-left-8 button {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  backdrop-filter: blur(10px);
+  cursor: grab;
+}
+
+.modern-table-wrapper .absolute.-top-8.-left-8 button:hover {
+  background: rgba(249, 250, 251, 0.95);
+  box-shadow: 0 4px 14px 0 rgba(156, 163, 175, 0.2);
+}
+
+.modern-table-wrapper .absolute.-top-8.-left-8 button:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+}
+
+/* Improved table cell styling */
+.tiptap-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.tiptap-table:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.tiptap-table-cell,
+.tiptap-table-header {
+  transition: background-color 0.2s ease;
+  border-color: rgba(229, 231, 235, 0.8);
+}
+
+.tiptap-table-header {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+.tiptap-table-cell:hover,
+.tiptap-table-header:hover {
+  background-color: rgba(59, 130, 246, 0.02);
+}
+
+/* Selection styling */
+.ProseMirror .selectedCell:after {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%);
+  border-radius: 4px;
+}
+
+/* Modern scrollbar for floating menu */
+.modern-table-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.modern-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modern-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.4);
+  border-radius: 2px;
+}
+
+.modern-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.6);
+}
+
+/* Glass morphism effect for floating controls */
+@supports (backdrop-filter: blur(10px)) {
+  .modern-table-wrapper button {
+    backdrop-filter: blur(10px);
+  }
+  
+  .modern-table-wrapper .absolute.top-full,
+  .modern-table-wrapper .absolute.left-full {
+    backdrop-filter: blur(16px);
+  }
+}
   
   
