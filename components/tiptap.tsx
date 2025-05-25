@@ -35,6 +35,7 @@ import {
   AiOutlineInsertRowRight,
   AiOutlineInsertRowBelow,
   AiOutlineInsertRowLeft,
+  AiOutlineCode,
 } from "react-icons/ai";
 import {
   LuBold,
@@ -53,7 +54,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { MdCode, MdFormatListBulleted, MdImage, MdLink } from "react-icons/md";
 import { FiImage } from "react-icons/fi";
 import { BiDockLeft, BiDockRight, BiTable } from "react-icons/bi";
-import { BsThreeDotsVertical, BsPlus } from "react-icons/bs";
+import { BsThreeDotsVertical, BsPlus, BsCode } from "react-icons/bs";
 import { HiOutlineDotsHorizontal, HiOutlineTrash } from "react-icons/hi";
 import {
   TbGripVertical,
@@ -1410,6 +1411,12 @@ const Tiptap = () => {
       isActive: () => editor.isActive("underline"),
     },
     {
+      icon: <BsCode />,
+      label: "Inline Code",
+      onClick: () => editor.chain().focus().toggleCode().run(),
+      isActive: () => editor.isActive("code"),
+    },
+    {
       icon: null,
       label: "DEVIDER",
       function: "DEVIDER",
@@ -1429,7 +1436,7 @@ const Tiptap = () => {
       isActive: () => editor.isActive("bulletList"),
     },
     {
-      icon: <MdCode />,
+      icon: <AiOutlineCode />,
       label: "Code Block",
       onClick: toggleCodeBlock,
       isActive: () => editor.isActive("codeBlock"),
@@ -1604,7 +1611,7 @@ const Tiptap = () => {
           placement: "top-start",
         }}
       >
-        <div className="flex flex-col items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow h-60 w-48 overflow-y-auto">
+        <div className="flex flex-col items-center gap-0.5 bg-white p-0.5 rounded-sm border-[1px] border-gray-100 shadow h-64 w-48 overflow-y-auto">
           {MenuItems.map((item, index) => (
             <>
               {item.function === "DEVIDER" ? (
@@ -1613,24 +1620,24 @@ const Tiptap = () => {
                 <div
                   key={index}
                   onClick={item.onClick}
-                  className={`p-1 text-lg rounded-md cursor-pointer flex gap-x-2 items-center  w-full ${
+                  className={`p-1 text-lg rounded-sm cursor-pointer flex gap-x-2 items-center  w-full ${
                     !!item.color ? `text-${item.color}-500` : ""
                   } ${
                     item.isActive() && !item.color
                       ? "bg-indigo-100 text-indigo-600"
-                      : "text-gray-800 hover:bg-gray-200 hover:text-indigo-600"
+                      : "text-gray-800 hover:bg-gray-100 hover:text-indigo-600"
                   }`}
                 >
                   <div
-                    className={`p-1 rounded-md  ${
+                    className={`p-1 rounded-md text-sm ${
                       !!item.color
-                        ? `text-${item.color}-500 bg-${item.color}-50`
+                        ? `text-${item.color}-600 bg-${item.color}-50`
                         : "text-indigo-600 bg-indigo-50"
                     }`}
                   >
                     {item.icon}
                   </div>
-                  <span className="text-sm">{item.label}</span>
+                  <span className="text-xs">{item.label}</span>
                 </div>
               )}
             </>
@@ -1651,7 +1658,7 @@ const Tiptap = () => {
                   {item?.function === "DEVIDER" ? (
                     <div className="w-[1px] h-6 bg-gray-300 mx-1"></div>
                   ) : (
-                    <Tooltip>
+                    <Tooltip delayDuration={0}>
                       <TooltipTrigger>
                         <button
                           onClick={item.onClick}
@@ -1668,7 +1675,7 @@ const Tiptap = () => {
                           {item.icon}
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent className="text-xs text-white bg-black/50 ">
+                      <TooltipContent className="text-xs text-white bg-black/70 ">
                         {item.label}
                       </TooltipContent>
                     </Tooltip>
@@ -1681,21 +1688,28 @@ const Tiptap = () => {
             MenuItems.map((item, index) => (
               <>
                 {item.function === "DEVIDER" ? (
-                  <div className="w-[1px] h-6  bg-gray-200 my-1 border-r-[1px] border-gray-200"></div>
+                  <div className="w-[1px] h-6 bg-gray-200 my-1 border-r-[1px] border-gray-200"></div>
                 ) : (
-                  <div
-                    key={index}
-                    onClick={item.onClick}
-                    className={`p-1 text-lg rounded-md cursor-pointer 
-                  ${!!item.color ? `text-${item.color}-500` : ""}
-                  ${
-                    item.isActive() && !item.color
-                      ? "bg-indigo-100 text-indigo-600"
-                      : "text-gray-800 hover:bg-gray-200"
-                  }`}
-                  >
-                    {item.icon}
-                  </div>
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger>
+                      <div
+                        key={index}
+                        onClick={item.onClick}
+                        className={`p-1 text-lg rounded-sm cursor-pointer 
+                      ${!!item.color ? `text-${item.color}-500` : ""}
+                      ${
+                        item.isActive() && !item.color
+                          ? "bg-indigo-100 text-indigo-600"
+                          : "text-gray-800 hover:bg-gray-100"
+                      }`}
+                      >
+                        {item.icon}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs text-white bg-black/70 ">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </>
             ))
