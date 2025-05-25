@@ -1866,7 +1866,7 @@ const Tiptap = () => {
       <BubbleMenu editor={editor} className="max-w-none">
         <div
           className={`flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow ${
-            editor.isActive("table") ? "" : "w-[410px]"
+            editor.isActive("table") ? "" : "w-[570px]"
           }`}
         >
           {editor.isActive("table") ? (
