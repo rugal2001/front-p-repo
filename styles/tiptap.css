@@ -901,5 +901,59 @@
     backdrop-filter: blur(16px);
   }
 }
+
+/* Font Family Support */
+.tiptap [style*="font-family"] {
+  font-family: inherit; /* This will be overridden by inline styles */
+}
+
+/* Support for CSS variables in font-family */
+.tiptap [style*="font-family: var("] {
+  font-family: var(--title-font-family, 'Helvetica', sans-serif);
+}
+
+/* Specific support for common font families */
+.tiptap [style*="font-family: Inter"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.tiptap [style*="font-family: serif"] {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.tiptap [style*="font-family: monospace"] {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+.tiptap [style*="font-family: cursive"] {
+  font-family: 'Brush Script MT', cursive;
+}
+
+.tiptap [style*="font-family: 'Comic Sans MS'"] {
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+}
+
+.tiptap [style*="font-family: 'Exo 2'"] {
+  font-family: 'Exo 2', sans-serif;
+}
+
+/* Ensure CSS variables work properly */
+.tiptap span[style*="font-family: var(--title-font-family)"] {
+  font-family: var(--title-font-family) !important;
+}
+
+/* Global CSS variable definition - you can override this */
+:root {
+  --title-font-family: 'Helvetica', sans-serif;
+}
+
+/* Font family classes for easier application */
+.font-inter { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+.font-comic-sans { font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif; }
+.font-serif { font-family: Georgia, 'Times New Roman', Times, serif; }
+.font-monospace { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; }
+.font-cursive { font-family: 'Brush Script MT', cursive; }
+.font-exo { font-family: 'Exo 2', sans-serif; }
+.font-title { font-family: var(--title-font-family); }
   
   

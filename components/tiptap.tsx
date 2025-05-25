@@ -90,6 +90,7 @@ import { Input } from "./shadcn/input";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Node, mergeAttributes } from "@tiptap/core";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./shadcn/tooltip";
+import TextStyle from "@tiptap/extension-text-style";
 
 // Create lowlight instance with all languages
 const lowlight = createLowlight(common);
@@ -944,6 +945,7 @@ const extensions = [
   Video,
   TypedBlockquote,
   FontFamily,
+  TextStyle,
 ];
 
 const content = `
@@ -955,7 +957,7 @@ const content = `
         <p><span style="font-family: var(--title-font-family)">Then there are CSS variables, the new hotness.</span></p>
         <p><span style="font-family: 'Exo 2'">TipTap even can handle exotic fonts as Exo 2.</span></p>
 <h1>Heading 1</h1>
-<img src="https://giffiles.alphacoders.com/208/208014.gif" width="800" height="400" />
+<img src="https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_630,w_1200,f_auto,q_auto/1949084/950518_813877.png" width="800" height="400" />
 
 <h2>Different Blockquote Types</h2>
 
@@ -1694,7 +1696,7 @@ const Tiptap = () => {
       isActive: () => false, // Video insertion doesn't have an active state
     },
     {
-      icon: <FaYoutube />,
+      icon: <FaYoutube className="text-red-500" />,
       label: "Youtube",
       color: "red",
       onClick: addYoutubeVideo,
