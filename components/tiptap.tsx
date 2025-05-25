@@ -14,12 +14,14 @@ import TableRow from "@tiptap/extension-table-row";
 import TableHeader from "@tiptap/extension-table-header";
 import TableCell from "@tiptap/extension-table-cell";
 import Gapcursor from "@tiptap/extension-gapcursor";
+import FontFamily from "@tiptap/extension-font-family";
 
 import Bold from "@tiptap/extension-bold";
 import BulletList from "@tiptap/extension-bullet-list";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Image from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
+import Blockquote from "@tiptap/extension-blockquote";
 
 import Italic from "@tiptap/extension-italic";
 import Link from "@tiptap/extension-link";
@@ -48,10 +50,25 @@ import {
   LuSeparatorHorizontal,
   LuTableCellsMerge,
   LuTableCellsSplit,
+  LuQuote,
 } from "react-icons/lu";
-import { PiColumnsPlusLeft, PiColumnsPlusRight, PiVideo } from "react-icons/pi";
+import {
+  PiColumnsPlusLeft,
+  PiColumnsPlusRight,
+  PiQuotes,
+  PiVideo,
+} from "react-icons/pi";
 import { RxHamburgerMenu } from "react-icons/rx";
-import { MdCode, MdFormatListBulleted, MdImage, MdLink } from "react-icons/md";
+import {
+  MdCode,
+  MdFormatListBulleted,
+  MdImage,
+  MdLink,
+  MdInfo,
+  MdCheckCircle,
+  MdWarning,
+  MdError,
+} from "react-icons/md";
 import { FiImage } from "react-icons/fi";
 import { BiDockLeft, BiDockRight, BiTable } from "react-icons/bi";
 import { BsThreeDotsVertical, BsPlus, BsCode } from "react-icons/bs";
@@ -765,6 +782,66 @@ const Video = Node.create({
   },
 });
 
+// Custom Typed Blockquote Extension
+const TypedBlockquote = Blockquote.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      type: {
+        default: "normal",
+        parseHTML: (element) => element.getAttribute("data-type"),
+        renderHTML: (attributes) => {
+          if (!attributes.type) {
+            return {};
+          }
+          return {
+            "data-type": attributes.type,
+          };
+        },
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: "blockquote",
+        getAttrs: (element) => {
+          const type =
+            (element as HTMLElement).getAttribute("data-type") || "normal";
+          return { type };
+        },
+      },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    const type = HTMLAttributes["data-type"] || "normal";
+
+    const typeClasses = {
+      normal: "my-4 border-l-4 border-gray-300 pl-4 py-2",
+      info: "my-4 border-l-4 border-blue-500 pl-4 bg-blue-50 text-blue-900 rounded-sm py-2",
+      success:
+        "my-4 border-l-4 border-green-500 pl-4 bg-green-50 text-green-900 rounded-sm py-2",
+      error:
+        "my-4 border-l-4 border-red-500 pl-4 bg-red-50 text-red-900 rounded-sm py-2",
+      warning:
+        "my-4 border-l-4 border-yellow-500 pl-4 bg-yellow-50 text-yellow-900 rounded-sm py-2",
+    };
+
+    return [
+      "blockquote",
+      {
+        ...HTMLAttributes,
+        class:
+          typeClasses[type as keyof typeof typeClasses] || typeClasses.normal,
+        "data-type": type,
+      },
+      0,
+    ];
+  },
+});
+
 // define your extension array
 const extensions = [
   StarterKit.configure({
@@ -865,11 +942,42 @@ const extensions = [
     },
   }),
   Video,
+  TypedBlockquote,
+  FontFamily,
 ];
 
 const content = `
+<p><span style="font-family: Inter">Did you know that Inter is a really nice font for interfaces?</span></p>
+        <p><span style="font-family: Comic Sans MS, Comic Sans">It doesn’t look as professional as Comic Sans.</span></p>
+        <p><span style="font-family: serif">Serious people use serif fonts anyway.</span></p>
+        <p><span style="font-family: monospace">The cool kids can apply monospace fonts aswell.</span></p>
+        <p><span style="font-family: cursive">But hopefully we all can agree, that cursive fonts are the best.</span></p>
+        <p><span style="font-family: var(--title-font-family)">Then there are CSS variables, the new hotness.</span></p>
+        <p><span style="font-family: 'Exo 2'">TipTap even can handle exotic fonts as Exo 2.</span></p>
 <h1>Heading 1</h1>
 <img src="https://giffiles.alphacoders.com/208/208014.gif" width="800" height="400" />
+
+<h2>Different Blockquote Types</h2>
+
+<blockquote class="my-4 border-l-4 border-gray-300 pl-4 py-2" data-type="normal">
+This is a normal blockquote. Simple and clean for regular quotations.
+</blockquote>
+
+<blockquote class="my-4 border-l-4 border-blue-500 pl-4 bg-blue-50 text-blue-900 rounded-sm py-2" data-type="info">
+This is an info blockquote. Use it to provide helpful information to your readers.
+</blockquote>
+
+<blockquote class="my-4 border-l-4 border-green-500 pl-4 bg-green-50 text-green-900 rounded-sm py-2" data-type="success">
+This is a success blockquote. Perfect for highlighting positive outcomes or confirmations.
+</blockquote>
+
+<blockquote class="my-4 border-l-4 border-yellow-500 pl-4 bg-yellow-50 text-yellow-900 rounded-sm py-2" data-type="warning">
+This is a warning blockquote. Use it to alert users about important considerations.
+</blockquote>
+
+<blockquote class="my-4 border-l-4 border-red-500 pl-4 bg-red-50 text-red-900 rounded-sm py-2" data-type="error">
+This is an error blockquote. Use it to highlight critical issues or problems that need attention.
+</blockquote>
 
 <h2>Sample Table</h2>
 <table class="tiptap-table">
@@ -1415,6 +1523,114 @@ const Tiptap = () => {
       label: "Inline Code",
       onClick: () => editor.chain().focus().toggleCode().run(),
       isActive: () => editor.isActive("code"),
+    },
+    {
+      icon: <PiQuotes />,
+      label: "Quotation",
+      onClick: () => {
+        if (editor.isActive("blockquote")) {
+          editor.chain().focus().unsetBlockquote().run();
+        } else {
+          editor.chain().focus().setBlockquote().run();
+          setTimeout(() => {
+            const { from, to } = editor.state.selection;
+            editor
+              .chain()
+              .focus()
+              .updateAttributes("blockquote", { type: "normal" })
+              .run();
+          }, 10);
+        }
+      },
+      isActive: () => editor.isActive("blockquote", { type: "normal" }),
+    },
+    {
+      icon: (
+        <div className="w-4 h-4 bg-blue-200 border-l-4 border-blue-500 rounded-sm" />
+      ),
+      label: "Hint:Info",
+      color: "blue",
+      onClick: () => {
+        if (editor.isActive("blockquote")) {
+          editor.chain().focus().unsetBlockquote().run();
+        } else {
+          editor.chain().focus().setBlockquote().run();
+          setTimeout(() => {
+            editor
+              .chain()
+              .focus()
+              .updateAttributes("blockquote", { type: "info" })
+              .run();
+          }, 10);
+        }
+      },
+      isActive: () => editor.isActive("blockquote", { type: "info" }),
+    },
+    {
+      icon: (
+        <div className="w-4 h-4 bg-green-200 border-l-4 border-green-500 rounded-sm" />
+      ),
+      label: "Hint:Success",
+      color: "green",
+      onClick: () => {
+        if (editor.isActive("blockquote")) {
+          editor.chain().focus().unsetBlockquote().run();
+        } else {
+          editor.chain().focus().setBlockquote().run();
+          setTimeout(() => {
+            editor
+              .chain()
+              .focus()
+              .updateAttributes("blockquote", { type: "success" })
+              .run();
+          }, 10);
+        }
+      },
+      isActive: () => editor.isActive("blockquote", { type: "success" }),
+    },
+    {
+      icon: (
+        <div className="w-4 h-4 bg-yellow-200 border-l-4 border-yellow-500 rounded-sm" />
+      ),
+      label: "Hint:Warning",
+      color: "yellow",
+      onClick: () => {
+        if (editor.isActive("blockquote")) {
+          editor.chain().focus().unsetBlockquote().run();
+        } else {
+          editor.chain().focus().setBlockquote().run();
+          setTimeout(() => {
+            editor
+              .chain()
+              .focus()
+              .updateAttributes("blockquote", { type: "warning" })
+              .run();
+          }, 10);
+        }
+      },
+      isActive: () => editor.isActive("blockquote", { type: "warning" }),
+    },
+    {
+      icon: (
+        <div className="w-4 h-4 bg-red-200 border-l-4 border-red-500 rounded-sm" />
+      ),
+      label: "Hint:Error",
+      color: "red",
+      onClick: () => {
+        if (editor.isActive("blockquote")) {
+          editor.chain().focus().unsetBlockquote().run();
+        } else {
+          editor.chain().focus().setBlockquote().run();
+          setTimeout(() => {
+            editor
+              .chain()
+              .focus()
+              .updateAttributes("blockquote", { type: "error" })
+              .run();
+          }, 10);
+        }
+      },
+      isActive: () => editor.isActive("blockquote", { type: "error" }),
     },
     {
       icon: null,
