@@ -1,3 +1,11 @@
+import FontFamily from "@tiptap/extension-font-family";
+import Gapcursor from "@tiptap/extension-gapcursor";
+import HorizontalRule from "@tiptap/extension-horizontal-rule";
+import Mention from "@tiptap/extension-mention";
+import Table from "@tiptap/extension-table";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import TableRow from "@tiptap/extension-table-row";
 import {
   BubbleMenu,
   Editor,
@@ -8,20 +16,13 @@ import {
   useEditor,
 } from "@tiptap/react";
 import { IoMdTrash } from "react-icons/io";
-import HorizontalRule from "@tiptap/extension-horizontal-rule";
-import Table from "@tiptap/extension-table";
-import TableRow from "@tiptap/extension-table-row";
-import TableHeader from "@tiptap/extension-table-header";
-import TableCell from "@tiptap/extension-table-cell";
-import Gapcursor from "@tiptap/extension-gapcursor";
-import FontFamily from "@tiptap/extension-font-family";
 
+import Blockquote from "@tiptap/extension-blockquote";
 import Bold from "@tiptap/extension-bold";
 import BulletList from "@tiptap/extension-bullet-list";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Image from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
-import Blockquote from "@tiptap/extension-blockquote";
 
 import Italic from "@tiptap/extension-italic";
 import Link from "@tiptap/extension-link";
@@ -30,67 +31,47 @@ import StarterKit from "@tiptap/starter-kit";
 import { common, createLowlight } from "lowlight";
 import { Node as ProseMirrorNode } from "prosemirror-model";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FaCheck, FaYoutube } from "react-icons/fa6";
-import { IoClose } from "react-icons/io5";
 import {
+  AiOutlineCode,
   AiOutlineInsertRowAbove,
-  AiOutlineInsertRowRight,
   AiOutlineInsertRowBelow,
   AiOutlineInsertRowLeft,
-  AiOutlineCode,
+  AiOutlineInsertRowRight,
 } from "react-icons/ai";
+import { BiTable } from "react-icons/bi";
+import { BsCode } from "react-icons/bs";
+import { FaCheck, FaYoutube } from "react-icons/fa6";
+import { FiImage } from "react-icons/fi";
+import { HiOutlineTrash } from "react-icons/hi";
+import { IoClose } from "react-icons/io5";
 import {
   LuBold,
   LuHeading1,
   LuHeading2,
   LuHeading3,
   LuItalic,
-  LuUnderline,
-  LuMinus,
   LuSeparatorHorizontal,
   LuTableCellsMerge,
   LuTableCellsSplit,
-  LuQuote,
+  LuUnderline,
 } from "react-icons/lu";
-import {
-  PiColumnsPlusLeft,
-  PiColumnsPlusRight,
-  PiQuotes,
-  PiVideo,
-} from "react-icons/pi";
-import { RxHamburgerMenu } from "react-icons/rx";
-import {
-  MdCode,
-  MdFormatListBulleted,
-  MdImage,
-  MdLink,
-  MdInfo,
-  MdCheckCircle,
-  MdWarning,
-  MdError,
-} from "react-icons/md";
-import { FiImage } from "react-icons/fi";
-import { BiDockLeft, BiDockRight, BiTable } from "react-icons/bi";
-import { BsThreeDotsVertical, BsPlus, BsCode } from "react-icons/bs";
-import { HiOutlineDotsHorizontal, HiOutlineTrash } from "react-icons/hi";
-import {
-  TbGripVertical,
-  TbGripHorizontal,
-  TbColumnRemove,
-  TbRowRemove,
-} from "react-icons/tb";
+import { MdFormatListBulleted, MdLink } from "react-icons/md";
+import { PiQuotes, PiVideo } from "react-icons/pi";
+import { TbColumnRemove, TbRowRemove } from "react-icons/tb";
+import { VscMention } from "react-icons/vsc";
 
 // Import additional languages for syntax highlighting
+import { Node, mergeAttributes } from "@tiptap/core";
+import Placeholder from "@tiptap/extension-placeholder";
+import TextStyle from "@tiptap/extension-text-style";
 import css from "highlight.js/lib/languages/css";
 import javascript from "highlight.js/lib/languages/javascript";
 import python from "highlight.js/lib/languages/python";
 import typescript from "highlight.js/lib/languages/typescript";
 import xml from "highlight.js/lib/languages/xml";
 import { Input } from "./shadcn/input";
-import Placeholder from "@tiptap/extension-placeholder";
-import { Node, mergeAttributes } from "@tiptap/core";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./shadcn/tooltip";
-import TextStyle from "@tiptap/extension-text-style";
+import suggestion from "./suggestion";
 
 // Create lowlight instance with all languages
 const lowlight = createLowlight(common);
@@ -946,18 +927,33 @@ const extensions = [
   TypedBlockquote,
   FontFamily,
   TextStyle,
+  Mention.configure({
+    HTMLAttributes: {
+      class: "mention",
+    },
+    suggestion,
+  }),
 ];
 
 const content = `
 <p><span style="font-family: Inter">Did you know that Inter is a really nice font for interfaces?</span></p>
-        <p><span style="font-family: Comic Sans MS, Comic Sans">It doesn’t look as professional as Comic Sans.</span></p>
+        <p><span style="font-family: Comic Sans MS, Comic Sans">It doesn't look as professional as Comic Sans.</span></p>
         <p><span style="font-family: serif">Serious people use serif fonts anyway.</span></p>
         <p><span style="font-family: monospace">The cool kids can apply monospace fonts aswell.</span></p>
         <p><span style="font-family: cursive">But hopefully we all can agree, that cursive fonts are the best.</span></p>
         <p><span style="font-family: var(--title-font-family)">Then there are CSS variables, the new hotness.</span></p>
         <p><span style="font-family: 'Exo 2'">TipTap even can handle exotic fonts as Exo 2.</span></p>
+
 <h1>Heading 1</h1>
 <img src="https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_630,w_1200,f_auto,q_auto/1949084/950518_813877.png" width="800" height="400" />
+
+<h2>Mentions Feature</h2>
+<p>Hi everyone! Don't forget the daily stand up at 8 AM.</p>
+<p><span data-type="mention" data-id="Jennifer Grey" class="mention">@Jennifer Grey</span> Would you mind to share what you've been working on lately? We fear not much happened since Dirty Dancing.</p>
+<p><span data-type="mention" data-id="Winona Ryder" class="mention">@Winona Ryder</span> <span data-type="mention" data-id="Axl Rose" class="mention">@Axl Rose</span> Let's go through your most important points quickly.</p>
+<p>I have a meeting with <span data-type="mention" data-id="Christina Applegate" class="mention">@Christina Applegate</span> and don't want to come late.</p>
+<p>– Thanks, your big boss</p>
+<p><em>Try typing @ to mention someone!</em></p>
 
 <h2>Different Blockquote Types</h2>
 
@@ -1702,6 +1698,15 @@ const Tiptap = () => {
       onClick: addYoutubeVideo,
       isActive: () => false, // Video insertion doesn't have an active state
     },
+    {
+      icon: <VscMention />,
+      label: "Mention",
+      color: "purple",
+      onClick: () => {
+        editor.chain().focus().insertContent("@").run();
+      },
+      isActive: () => false,
+    },
   ];
 
   const handleVideoKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -1866,7 +1871,7 @@ const Tiptap = () => {
       <BubbleMenu editor={editor} className="max-w-none">
         <div
           className={`flex items-center gap-0.5 bg-white p-0.5 rounded-md border-[1px] border-gray-100 shadow ${
-            editor.isActive("table") ? "" : "w-[570px]"
+            editor.isActive("table") ? "" : "w-[590px]"
           }`}
         >
           {editor.isActive("table") ? (
